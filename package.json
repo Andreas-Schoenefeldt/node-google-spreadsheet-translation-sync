@@ -1,0 +1,32 @@
+{
+  "name": "google-spreadsheet-translation-sync",
+  "version": "0.0.1",
+  "description": "A plugin to read and write i18n translationsfrom and to google spreadsheets ",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andreas-Schoenefeldt/node-google-spreadsheet-translation-sync.git"
+  },
+  "keywords": [
+    "i18n",
+    "translations",
+    "google-spreadsheets"
+  ],
+  "author": "“Andreas <“schoenefeldt.andreas@gmail.com”> (https://github.com/Andreas-Schoenefeldt)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Andreas-Schoenefeldt/node-google-spreadsheet-translation-sync/issues"
+  },
+  "engines": {
+    "node": ">=8.1.0"
+  },
+  "homepage": "https://github.com/Andreas-Schoenefeldt/node-google-spreadsheet-translation-sync#readme",
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "eslint": "^4.0.0",
+    "mocha": "^3.4.2"
+  }
+}
