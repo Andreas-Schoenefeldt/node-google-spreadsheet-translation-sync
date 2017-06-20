@@ -1,6 +1,6 @@
 {
   "name": "google-spreadsheet-translation-sync",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A plugin to read and write i18n translationsfrom and to google spreadsheets ",
   "main": "index.js",
   "scripts": {
