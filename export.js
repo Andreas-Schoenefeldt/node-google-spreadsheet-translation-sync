@@ -13,7 +13,7 @@ const app = require('./index')
 app.exportToSpreadsheet(exportPath, sheetId, credentials, function (targetPath, callback) {
 
   const shell = require('shelljs')
-  const withoutError = require('./helpers').withoutError
+  const withoutError = require('./src/helpers').withoutError
 
   if (!shell.which('php')) {
     withoutError('Sorry, this script requires php', callback)
