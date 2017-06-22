@@ -63,6 +63,8 @@ describe('#Export', function () {
             expect(err).to.be.null
             expect(rows).to.have.lengthOf(csvData.length - 1)
             expect(rows[0].pl).to.equal(csvData[1][5])
+            expect(rows[0].default).to.equal('')
+            expect(rows[0].hu).to.equal('Elfogadom') // this was not part of the upload and should not be overwrittem
             expect(rows[1].default).to.equal(csvData[2][1])
             expect(rows[1].de).to.equal(csvData[2][2])
             expect(rows[1].key).to.equal(csvData[2][0])

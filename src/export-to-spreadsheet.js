@@ -95,10 +95,10 @@ module.exports = function (localPath, sheetId, credentials, csvGetter, callback)
 
                             // now we work with the actual data
                             // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
-                            let expectedValue = csvData[cell.row - 2][headerIndexMap[cell.col]]
+                            let expectedValue = headerIndexMap[cell.col] !== undefined ? csvData[cell.row - 2][headerIndexMap[cell.col]] : null
 
                             // we only override the spreadsheet from the code, if we actually have a value
-                            if (expectedValue && cell.value !== expectedValue) {
+                            if (expectedValue !== null && cell.value !== expectedValue) {
                               cell.value = expectedValue
                               changedCells.push(cell)
                             }
