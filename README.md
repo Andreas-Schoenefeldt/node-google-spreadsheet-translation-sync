@@ -6,7 +6,7 @@
 >
 > So long I'll just happy use it as it is for myself :) 
 
-A plugin to read and write i18n translationsfrom and to google spreadsheets
+A plugin to read and write i18n translations from and to google spreadsheets
 
 ## Installation
 
