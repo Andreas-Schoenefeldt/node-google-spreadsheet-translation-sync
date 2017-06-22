@@ -1,4 +1,7 @@
 # node-google-spreadsheet-translation-sync
+
+[![Build Status](https://travis-ci.org/Andreas-Schoenefeldt/node-google-spreadsheet-translation-sync.svg?branch=master)](https://travis-ci.org/Andreas-Schoenefeldt/node-google-spreadsheet-translation-sync)
+
 A plugin to read and write i18n translationsfrom and to google spreadsheets
 
 ## Installation

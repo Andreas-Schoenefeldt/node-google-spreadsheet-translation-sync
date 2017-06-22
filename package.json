@@ -28,5 +28,11 @@
     "chai": "^4.0.2",
     "eslint": "^4.0.0",
     "mocha": "^3.4.2"
+  },
+  "dependencies": {
+    "fast-csv": "^2.4.0",
+    "google-spreadsheet": "^2.0.4",
+    "mkdirp": "^0.5.1",
+    "shelljs": "^0.7.8"
   }
 }

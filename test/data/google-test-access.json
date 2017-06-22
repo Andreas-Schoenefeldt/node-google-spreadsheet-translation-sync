@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "seismic-hexagon-171311",
+  "private_key_id": "b2efa9eb154ca1db144e2028e7a28fd84a298b38",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDIvRemip3OQKLi\nmsKTwksSaoH/BqyvcaLYee2EwKGjPO8or4pvgcx/yys2ZuHnm3r3MI4WFuUEoiji\nj+DhI2+X2DEa3DyUbsv2lrOQjL0WQ/z6+8aAezbcDk/FwDefkvrpDs8EQoHzlylI\nBk9Junu/R/HCS8Ul0fbRLsVd5gsz+N6JCxiKxxD0iBhLjvQVLc1vEqbQMXU66W2w\nGvCGiozNrvfX+OTzrY4Xig2YnvOwT69ixNT71ffF2li43bb6Efm+N2acx1ouRmKt\nSMguKsbOs1MwF31AfUwlsgqyHt5i9QnC4cYuoARd+sxNS3rmiglvcNyHfpN1S0r9\n6rGSTvuzAgMBAAECggEACdbW5qD4IvvURnYrRmUC5/6t3rgb7vRYQb/lzmV6WfV3\ni+kUYh3P58Da6xPRsj5sbkEd6papsaq/HuFj6bUicaQ1Plzmk6hdbMZ7O7RIsMnM\nh+k4x0oCz0UP6bn5UzC4BeqZANtZSLBmluZHeaFfeNAIDHivsghftP+6L3DCQmqz\n4b+E0Dc0SphsiRjcr5E04L0srVs7mcioe53/QIDYLlU+CgqPK1eVuE0EpE/K1qTS\nkBrX2DkdD4ZwgWCFH8JtiZxudEuDFsXdKeeZnAIaXnFWMUfdkAfSqU0bVecQhzwJ\nKoMD4tBRrRy7OKFg/r1X6siVLwGMgEMCUfF95UjKOQKBgQDllqoQPCfy3EQcxWpI\nsPnY33FGTBkzG+DiVPk8nFg/BmSjGLK8o27f/C13dZQYk+npy2idBRLivtdTBHnX\n40D9IbpPY2znHZG9v/55aM/Ak4IToK5LcYRO/0DSgP3d75DyK4c2E/OHeyZZQ5re\nbLAa5kaEexq+AKwwgMUplODXuwKBgQDf1M3+Iq1Tjacy3JI71Xjg9/44B3YFdQKc\nHhaAFQAQ8S73aUbXjUEGsALhPuysAlMruXf400ccqLG/jIqQCN2me7SDMOBoaVIf\nvs7OJxMwtleymsdRO2WiyqM/jgsz/RzMUyEm2bcOVyh70rmjdKb2kRhNzPmiKfKd\nrSk96JuAaQKBgQCd9XT4SospuoZaTTD85lZf8gubVAwab9nfnpsEKoVEh3+B/yIq\nSz+jd3tIr2q/JjVPl5VYQv9lZev7wB6cfExgXG405LEuqdd197x7h7M4ScS7AFgq\nq+Vd/Jx6uCjyIztUgsI6YKuy0PXngG3zDlBzkW9/Aru5cfkGPfJo03eGtQKBgQCB\nmhuIShXoKj4kshiuMoXiZVW6pX9N25meQcGveflm1e/m6/tL9gsvzxxrxd6OHm6A\nA80Ws2cajgcVrU/R5IBK1JgJ2nQloM4feYEPVwrCiuIulXZRb74Cy6hItXuBJ87T\n9FJex3M6B3d2cuZwYawHWq4i5kuo/PbxG4Gkyhm3+QKBgCB7yQy0vS+uqg9rPqtg\nWdgGTP2DC39swN4hiIkbXKk4kYknnTxuJa6nEpg5gRtujOuTzLsLgSyL9dz+G51t\nFWAbX2E3+DuAmqetY703lPe8Q4CyZV3Jr6sG1astndJ/X0qvcXII5YC03HlpoN76\nhc5B09JoVtUMBIUiJne4RxDS\n-----END PRIVATE KEY-----\n",
+  "client_email": "service@seismic-hexagon-171311.iam.gserviceaccount.com",
+  "client_id": "116216769033616725253",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/service%40seismic-hexagon-171311.iam.gserviceaccount.com"
+}

@@ -2,10 +2,17 @@
 
 /**
  * Adds commas to a number
- * @param {number} number
- * @param {string} locale
- * @return {string}
  */
-module.exports = function (number, locale) {
-  return number.toLocaleString(locale)
-}
+
+/**
+ * @param {string} localPath the path where to export the translations locally, before uploading
+ * @param sheetId the google spreadsheet id
+ * @param credentials the google json credentials
+ * @param {function} callback
+ */
+module.exports.exportToSpreadsheet = require('./src/export-to-spreadsheet')
+
+/**
+ *
+ */
+module.exports.importFromSpreadsheet = require('./src/import-from-spreadsheet')
