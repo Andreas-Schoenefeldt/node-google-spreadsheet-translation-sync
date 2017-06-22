@@ -10,5 +10,11 @@ let exportPath = path.join(__dirname, 'tmp')
 const credentials = require('./projects/dw-connect-credentials.json')
 const app = require('./index')
 
-app.importFromSpreadsheet(exportPath, sheetId, credentials)
-
+app.importFromSpreadsheet(exportPath, sheetId, credentials, function (err) {
+  if (!err) {
+    console.log('Yea! Import is done!')
+  } else {
+    console.log('Error during import attempt:')
+    console.log(err)
+  }
+})
