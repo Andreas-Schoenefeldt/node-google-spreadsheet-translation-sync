@@ -7,33 +7,24 @@
  * @param {string} localPath the path where to export the translations locally, before uploading
  * @param sheetId the google spreadsheet id
  * @param credentials the google json credentials
+ * @param {function} callback
  */
-module.exports = function (localPath, sheetId, credentials) {
+module.exports = function (localPath, sheetId, credentials, csvGetter, callback) {
 
   const mkdirp = require('mkdirp')
 
   mkdirp(localPath, function (err) {
 
-    const shell = require('shelljs')
+    const withoutError = require('./helpers').withoutError
 
-    if (!err) {
-      if (!shell.which('php')) {
-        shell.echo('Sorry, this script requires php')
-        shell.exit(1)
-      } else {
+    if (withoutError(err, callback)) {
 
-        let result = shell.exec('php /Users/Andreas/Dropbox/Scripting/WebdevOptimizers/scripts/MergeTranslationFile.php -e zend -xa -f ' + localPath + ' application/')
-
-        // do some output parsing?
-
-        if (result.code === 0) {
+      csvGetter(localPath, function (err, csvPath) {
+        if (withoutError(err)) {
 
           const csv = require('fast-csv')
           const fs = require('fs')
-          const path = require('path')
           const connector = require('./connector')
-
-          let csvPath = path.join(localPath, 'ALL-KEYS-EXPORT.csv')
 
           if (fs.existsSync(csvPath)) {
 
@@ -43,6 +34,8 @@ module.exports = function (localPath, sheetId, credentials) {
             let cellsPerRow
 
             let stream = fs.createReadStream(csvPath)
+
+            console.log('start to read csv ' + csvPath)
 
             csv.fromStream(stream)
               .on('data', function (data) {
@@ -72,31 +65,33 @@ module.exports = function (localPath, sheetId, credentials) {
                 })
 
                 // upload to google
-                connector(sheetId, credentials, function (sheet) {
+                connector(sheetId, credentials, function (err, sheet) {
 
-                  sheet.getCells({
-                    'min-row': 1,
-                    'max-row': csvData.length + 1, // because row index is 1 based
-                    'min-col': 1,
-                    'max-col': cellsPerRow,
-                    'return-empty': true
-                  }, function (err, cells) {
+                  if (withoutError(err, callback)) {
 
-                    if (!err) {
+                    sheet.getCells({
+                      'min-row': 1,
+                      'max-row': csvData.length + 1, // because row index is 1 based
+                      'min-col': 1,
+                      'max-col': sheet.colCount,
+                      'return-empty': true
+                    }, function (err, cells) {
 
-                      let changedCells = []
-                      let headerIndexMap = {}
+                      if (withoutError(err, callback)) {
 
-                      cells.forEach(function (cell) {
+                        let changedCells = []
+                        let headerIndexMap = {}
+                        let maxIndex = 0
 
-                        if (cell.col < cellsPerRow) {
+                        cells.forEach(function (cell) {
 
                           if (cell.row === 1) {
                             // this is the header row
                             if (cell.value) {
                               headerIndexMap[cell.col] = header[cell.value]
+                              maxIndex = cell.col
                             }
-                          } else {
+                          } else if (cell.col <= maxIndex) {
 
                             // now we work with the actual data
                             // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
@@ -108,111 +103,36 @@ module.exports = function (localPath, sheetId, credentials) {
                               changedCells.push(cell)
                             }
                           }
-                        }
-                      })
 
-                      if (changedCells.length > 0) {
-
-                        console.log('Updating %s changed cells', changedCells.length)
-
-                        sheet.bulkUpdateCells(changedCells, function (err) {
-                          if (!err) {
-                            console.log('SUCCESS: Data was updated')
-                          } else {
-                            console.log('Error: Could not update cells:  %s', err)
-                          }
                         })
 
-                      } else {
-                        console.log('Nothing changed since the last run')
+                        if (changedCells.length > 0) {
+
+                          console.log('Updating %s changed cells', changedCells.length)
+
+                          sheet.bulkUpdateCells(changedCells, function (err) {
+                            if (withoutError(err, callback)) {
+                              console.log('SUCCESS: Data was updated')
+                              callback(null)
+                            }
+                          })
+
+                        } else {
+                          console.log('Nothing changed since the last run')
+                          callback(null)
+                        }
                       }
-
-                    } else {
-                      console.log('Error: Could not get Cells:  %s', err)
-                    }
-                  })
-
-                  /*
-
-                   sheet.getRows({
-                   offset: 0,
-                   limit: csvData.length
-                   }, function (err, rows) {
-
-                   if (!err) {
-
-                   let addRow = function (i) {
-                   if (i < csvData.length) {
-
-                   console.log('Adding row %s (%s)', i + 2, csvData[i][header.key])
-
-                   let row = {}
-                   for (let name in header) {
-                   row[name] = csvData[i][header[name]]
-                   }
-
-                   sheet.addRow(row, function (err) {
-                   if (err) {
-                   console.error('could not create row %s: %s', i + 2, err)
-                   }
-
-                   addRow(i + 1)
-                   })
-                   }
-                   }
-
-                   console.log('Read ' + rows.length + ' rows of ' + csvData.length)
-                   let i = 0
-
-                   for (i; i < rows.length; i++) {
-
-                   let row = rows[0]
-
-                   console.log(csvData[i])
-                   console.log(row)
-                   throw new Exception('stop')
-
-                   for (let name in header) {
-                   row[name] = csvData[i][header[name]]
-                   }
-                   row.save(function (err) {
-                   if (err) {
-                   console.error('could not save row %s: %s', i + 2, err)
-                   }
-                   })
-                   }
-
-                   addRow(i)
-
-                   /*
-                   throw 'stop'
-
-                   // the row is an object with keys set by the column headers
-                   rows[0].colname = 'new val'
-                   rows[0].save() // this is async
-
-                   // deleting a row
-                   rows[0].del()  // this is async
-
-                   }
-                   })
-                   */
-
+                    })
+                  }
                 })
 
               })
           } else {
-            console.log('Error: File does not exist:  %s', csvPath)
+            withoutError('File does not exist: ' + csvPath, callback)
           }
 
-        } else {
-          console.log('Error %o', result)
         }
-
-      }
-
-    } else {
-      console.error(err)
+      })
     }
 
   })

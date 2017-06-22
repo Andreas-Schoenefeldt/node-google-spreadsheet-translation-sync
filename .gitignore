@@ -61,3 +61,6 @@ typings/
 .idea
 
 /tmp/
+/projects/
+.DS_Store
+/test/data/test.csv

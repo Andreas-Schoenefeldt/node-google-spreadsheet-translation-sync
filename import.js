@@ -1,13 +1,14 @@
 'use strict'
 
-const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI'
+const sheetId = '1hquyoD7DBdG_K0FxRy6L6a-ejRgXLRk3fnc5nBGlhzw' // dw-connect translations
 const path = require('path')
 
 console.log('this script runs at %s', __dirname)
 
 let exportPath = path.join(__dirname, 'tmp')
 
-const credentials = require('./test/data/google-test-access.json')
-const importer = require('./src/import-from-spreadsheet')
+const credentials = require('./projects/dw-connect-credentials.json')
+const app = require('./index')
 
-importer(exportPath, testSheetId, credentials)
+app.importFromSpreadsheet(exportPath, sheetId, credentials)
+
