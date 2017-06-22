@@ -30,6 +30,10 @@
     "mocha": "^3.4.2"
   },
   "dependencies": {
-    "google-spreadsheet": "^2.0.4"
+    "S": "0.0.1",
+    "fast-csv": "^2.4.0",
+    "google-spreadsheet": "^2.0.4",
+    "mkdirp": "^0.5.1",
+    "shelljs": "^0.7.8"
   }
 }
