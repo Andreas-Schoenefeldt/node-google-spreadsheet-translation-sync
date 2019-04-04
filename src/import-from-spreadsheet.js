@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = function (fileToWriteDataTo, sheetId, credentials, callback) {
+module.exports = function (translationRootFolder, sheetId, credentials, translationFormat, callback) {
 
   const connector = require('./connector')
   const withoutError = require('./helpers').withoutError
@@ -17,35 +17,35 @@ module.exports = function (fileToWriteDataTo, sheetId, credentials, callback) {
       }, function (err, cells) {
         if (withoutError(err, callback)) {
 
-          let csvData = []
+          const headers = [];
+          const translationData = {}
+          let key;
 
           cells.forEach(function (cell) {
             let rowIndex = cell.row - 1
             let cellIndex = cell.col - 1
+            let val = cell.value.trim();
 
-            if (!csvData[rowIndex]) {
-              csvData[rowIndex] = []
-            }
-
-            csvData[rowIndex][cellIndex] = cell.value.trim()
-          })
-
-          const csv = require('fast-csv');
-
-          csv.writeToPath(
-            fileToWriteDataTo, csvData, {headers: true}
-          ).on('finish', function (err) {
-            if (withoutError(err, callback)) {
-              console.log('done Writing import csv!')
-
-              callback();
-              //
-              //const shell = require('shelljs')
-              //shell.exec('php /Users/Andreas/Dropbox/Scripting/WebdevOptimizers/scripts/MergeTranslationFile.php -e zend -force -f ' + importFile + ' application/', function (code, stdout, stderr) {
-              //  callback()
-              //})
+            if (rowIndex === 0) {
+              headers[cellIndex] = val;
+              if (cellIndex > 0) {
+                translationData[val] = {};
+              }
+            } else {
+              if (cellIndex === 0) {
+                key = val;
+              } else if (val && key) {
+                translationData[headers[cellIndex]][key] = val;
+              }
             }
           })
+
+          // now we get the handler
+          const h = require('./handler');
+          const handler = h.getHandler(translationFormat ? translationFormat : h.TRANSLATION_FORMATS.LOCALE_JSON );
+
+          handler.updateTranslations(translationData, translationRootFolder, callback);
+
         }
       })
     }

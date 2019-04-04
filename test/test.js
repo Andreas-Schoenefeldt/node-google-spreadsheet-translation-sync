@@ -56,7 +56,28 @@ describe('#Export', function () {
     })
   })
 
-  it('should export test project', function (done) {
+  it('should import updated keys in the test project', function (done) {
+    this.timeout(timeout);
+
+    const translationFormat = 'locale_json';
+    const translationRoot = path.resolve('./test/translations/' + translationFormat + '/');
+    const testFile = path.resolve(translationRoot + '/default.json');
+
+    app.importFromSpreadsheet(translationRoot, testSheetId, accessData, translationFormat, function (err) {
+      expect(err).to.be.null
+
+      if (!err) {
+        const defaultKeys = require(testFile);
+
+        expect(Object.keys(defaultKeys).length).to.equal(325);
+        expect(defaultKeys.return).to.equal("Go back");
+      }
+
+      done();
+    });
+  })
+
+  it('should upload changes in the test project', function (done) {
     this.timeout(timeout);
 
     app.exportToSpreadsheet(targetPath, testSheetId, accessData, function (targetPath, callback) {

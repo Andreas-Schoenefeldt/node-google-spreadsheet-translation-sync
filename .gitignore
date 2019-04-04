@@ -63,4 +63,4 @@ typings/
 /tmp/
 /projects/
 .DS_Store
-/test/data/test.csv
+/test/translations/

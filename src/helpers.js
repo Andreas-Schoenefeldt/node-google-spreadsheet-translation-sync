@@ -4,7 +4,10 @@
 
 module.exports.withoutError = function (err, callback) {
   if (err) {
-    callback(err)
+
+    if (callback) {
+      callback(err)
+    }
     return false
   }
 

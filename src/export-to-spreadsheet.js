@@ -9,7 +9,7 @@
  * @param credentials the google json credentials
  * @param {function} callback
  */
-module.exports = function (localPath, sheetId, credentials, csvGetter, callback) {
+module.exports = function (translationFiles, sheetId, credentials, translationFormat, callback) {
 
   const mkdirp = require('mkdirp')
 
