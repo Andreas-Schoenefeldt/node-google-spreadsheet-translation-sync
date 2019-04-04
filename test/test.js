@@ -5,14 +5,18 @@ const expect = require('chai').expect
 const app = require('../index')
 const connector = require('../src/connector')
 const accessData = require('./data/google-test-access.json')
+const tmp = require('tmp');
 
 const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI'
+const timeout = 20000;
 
 // preparations
 
+var tmpFile = tmp.fileSync({postfix: '.csv'});
+
 const csv = require('fast-csv')
-const targetPath = path.join(__dirname, 'data')
-const testFile = path.join(targetPath, 'test.csv')
+const testFile = tmpFile.name;
+const targetPath = path.basename(testFile);
 const csvData = [
   ['key', 'default', 'de', 'it', 'fr', 'pl'],
   ['additional.news', null, null, null, null, 'czecz ' + Math.round(Math.random() * 10000)],
@@ -27,8 +31,15 @@ csv.writeToPath(
 describe('#Export', function () {
 
   it('should connect to the test google doc', function (done) {
+    this.timeout(timeout);
 
     connector(testSheetId, accessData, function (err, sheet) {
+
+      if (err) {
+        console.log('Connection Error: ')
+        console.log(err);
+      }
+
       expect(err).to.be.null
       expect(sheet).to.be.an('object')
       done()
@@ -36,6 +47,8 @@ describe('#Export', function () {
   })
 
   it('should not connect with wrong credentials', function (done) {
+    this.timeout(timeout);
+
     connector('1eK_x1MKcoTQXXZhN4p3wuN94PVl2sGBh8KWuoBasBcM', accessData, function (err, sheet) {
       console.log(sheet)
       expect(err).to.not.be.null
@@ -44,7 +57,7 @@ describe('#Export', function () {
   })
 
   it('should export test project', function (done) {
-    this.timeout(10000)
+    this.timeout(timeout);
 
     app.exportToSpreadsheet(targetPath, testSheetId, accessData, function (targetPath, callback) {
       callback(null, testFile)

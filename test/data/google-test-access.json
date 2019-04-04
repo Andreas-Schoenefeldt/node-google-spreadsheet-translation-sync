@@ -1,4 +1,6 @@
 {
+  "comment": "This is my the spreadsheet translation sync project at  https://console.developers.google.com",
+
   "type": "service_account",
   "project_id": "seismic-hexagon-171311",
   "private_key_id": "b2efa9eb154ca1db144e2028e7a28fd84a298b38",
