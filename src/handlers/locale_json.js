@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const withoutError = require('../helpers').withoutError
+const constraints = require('../util/constraints');
 
 module.exports.loadTranslationFile = function (filePath, callback) {
 
@@ -30,22 +31,29 @@ module.exports.updateTranslations = function (translationData, translationRootFo
   }
 
   async.each(Object.keys(translationData), function(locale, done) {
-    const localeFileName = locale + '.json';
-    const file = path.resolve(translationRootFolder + '/' + localeFileName);
 
-    mod.loadTranslationFile(file, function (translations) {
-      const potentiallyUpdatedTranslations = translationData[locale];
+    // is it a comment or a real translation?
+    if (locale !== constraints.commentCollumnName) {
 
-      Object.assign(translations, potentiallyUpdatedTranslations);
+      const localeFileName = locale + '.json';
+      const file = path.resolve(translationRootFolder + '/' + localeFileName);
 
-      // now we write
-      fs.writeFile(file, JSON.stringify(translations, null, 4), function (err) {
-        if (withoutError(err)) {
-          console.info('Updated translations of %o', localeFileName);
-        }
-        done();
+      mod.loadTranslationFile(file, function (translations) {
+        const potentiallyUpdatedTranslations = translationData[locale];
+
+        Object.assign(translations, potentiallyUpdatedTranslations);
+
+        // now we write
+        fs.writeFile(file, JSON.stringify(translations, null, 4), function (err) {
+          if (withoutError(err)) {
+            console.info('Updated translations of %o', localeFileName);
+          }
+          done();
+        })
       })
-    })
+    } else {
+      done();
+    }
   }, function (err) {
     if (withoutError(err, callback)) {
       callback(null);

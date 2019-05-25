@@ -1,8 +1,5 @@
 'use strict'
 
-module.exports.TRANSLATION_FORMATS = {
-  LOCALE_JSON: 'locale_json'
-}
 
 /**
  *
@@ -11,13 +8,17 @@ module.exports.TRANSLATION_FORMATS = {
  */
 module.exports.getHandler = function (translationFormat) {
 
+  const TRANSLATION_FORMATS = require('./util/constraints').TRANSLATION_FORMATS;
+
   switch (translationFormat) {
     default:
       throw new Error('No handler available for the translation format ' + translationFormat);
       break;
-    case this.TRANSLATION_FORMATS.LOCALE_JSON:
+    case TRANSLATION_FORMATS.LOCALE_JSON:
       return require('./handlers/locale_json');
       break;
-
+    case TRANSLATION_FORMATS.GETTEXT:
+      return require('./handlers/gettext');
+      break;
   }
 }

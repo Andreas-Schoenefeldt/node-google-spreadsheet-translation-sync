@@ -38,6 +38,7 @@
   "dependencies": {
     "async": "^2.6.2",
     "fast-csv": "^2.4.0",
+    "gettext-parser": "^4.0.0",
     "google-spreadsheet": "^2.0.7",
     "mkdirp": "^0.5.1",
     "shelljs": "^0.7.8",
