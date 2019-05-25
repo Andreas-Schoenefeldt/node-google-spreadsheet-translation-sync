@@ -10,9 +10,10 @@
  * @param credentials the google json credentials
  * @param {function} callback
  */
-module.exports.exportToSpreadsheet = require('./src/export-to-spreadsheet')
+module.exports.exportToSpreadsheet = require('./src/export-to-spreadsheet');
 
-/**
- *
- */
-module.exports.importFromSpreadsheet = require('./src/import-from-spreadsheet')
+
+module.exports.importFromSpreadsheet = require('./src/import-from-spreadsheet');
+
+
+module.exports.possibleTranslationFormats = require('./src/util/constraints').translationFormats;
