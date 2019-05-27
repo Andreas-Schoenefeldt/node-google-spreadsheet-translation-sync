@@ -70,11 +70,16 @@ const tests = [
     fnc: function (done) {
       this.timeout(timeout);
 
-      const translationFormat = 'locale_json';
-      const translationRoot = path.resolve('./test/translations/' + translationFormat + '/');
+      const options = {
+        translationFormat: 'locale_json',
+        spreadsheetId: testSheetId,
+        credentials: accessData
+      }
+
+      const translationRoot = path.resolve('./test/translations/' + options.translationFormat + '/');
       const testFile = path.resolve(translationRoot + '/default.json');
 
-      app.importFromSpreadsheet(translationRoot, testSheetId, accessData, translationFormat, function (err) {
+      app.importFromSpreadsheet(translationRoot, options, function (err) {
         expect(err).to.be.null
 
         if (!err) {
@@ -95,15 +100,26 @@ const tests = [
     fnc: function (done) {
       this.timeout(timeout);
 
-      const translationFormat = 'gettext';
-      const translationRoot = path.resolve('./test/translations/' + translationFormat + '/');
-      const testFile = path.resolve(translationRoot + '/en.po');
+      const baseName = 'karmapa-chenno';
 
-      app.importFromSpreadsheet(translationRoot, testSheetId_gettext, accessData, translationFormat, function (err) {
+      const options = {
+        translationFormat: 'gettext',
+        fileBaseName: baseName,
+        spreadsheetId: testSheetId_gettext,
+        credentials: accessData
+      }
+
+      const translationRoot = path.resolve('./test/translations/' + options.translationFormat + '/');
+      const testFile = path.resolve(translationRoot + '/' + baseName + '-en.po');
+
+      app.importFromSpreadsheet(translationRoot, options, function (err) {
         expect(err).to.be.null
 
         if (!err) {
           const fs = require('fs');
+
+          expect(fs.existsSync(testFile)).to.equal(true);
+
           const po = require('gettext-parser').po.parse(fs.readFileSync(testFile));
           const translations = po.translations[''];
 

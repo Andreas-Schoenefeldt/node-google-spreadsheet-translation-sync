@@ -1,9 +1,12 @@
 'use strict'
 
-module.exports = function (translationRootFolder, sheetId, credentials, translationFormat, callback) {
+module.exports = function (translationRootFolder, options, callback) {
 
   const connector = require('./connector')
   const withoutError = require('./helpers').withoutError
+  const sheetId = options.spreadsheetId
+  const credentials = options.credentials
+  const translationFormat = options.translationFormat
 
   connector(sheetId, credentials, function (err, sheet) {
 
@@ -44,7 +47,7 @@ module.exports = function (translationRootFolder, sheetId, credentials, translat
           const h = require('./handler');
           const handler = h.getHandler(translationFormat ? translationFormat : h.TRANSLATION_FORMATS.LOCALE_JSON );
 
-          handler.updateTranslations(translationData, translationRootFolder, callback);
+          handler.updateTranslations(translationData, translationRootFolder, options, callback);
 
         }
       })

@@ -28,10 +28,11 @@ module.exports.loadTranslationFile = function (filePath, callback) {
 }
 
 
-module.exports.updateTranslations = function (translationData, translationRootFolder, callback) {
+module.exports.updateTranslations = function (translationData, translationRootFolder, options, callback) {
   const path = require('path');
   const async = require('async');
   const mod = this;
+  const fileUtils = require('../util/file-utils');
 
   if (! fs.existsSync(translationRootFolder)) {
     throw new Error('The folder ' + translationRootFolder + ' does not exist');
@@ -44,9 +45,9 @@ module.exports.updateTranslations = function (translationData, translationRootFo
     // is it a comment or a real translation?
     if (locale !== constraints.commentCollumnName) {
 
-      const localeFileName = locale + '.po';
+      const localeFileName = fileUtils.buildTranslationFileName(constraints.TRANSLATION_FORMATS.GETTEXT, locale, options);
       const file = path.resolve(translationRootFolder + '/' + localeFileName);
-      const moFile = path.resolve(translationRootFolder + '/' + locale + '.mo');
+      const moFile = path.resolve(translationRootFolder + '/' + localeFileName.replace('.po', '.mo'));
 
       mod.loadTranslationFile(file, function (parsedObj) {
 
@@ -59,6 +60,7 @@ module.exports.updateTranslations = function (translationData, translationRootFo
               "content-type": "text/plain; charset=UTF-8",
               "plural-forms": "nplurals=2; plural=(n!=1);",
               "X-Generator" : "node-google-spreadsheet-translation-update",
+              "Project-Id-Version": options.fileBaseName,
               "Language" : locale
             },
 

@@ -1,6 +1,6 @@
 {
   "name": "google-spreadsheet-translation-sync",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A plugin to read and write i18n translationsfrom and to google spreadsheets ",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,12 @@
     "google-spreadsheets"
   ],
   "author": "“Andreas <“schoenefeldt.andreas@gmail.com”> (https://github.com/Andreas-Schoenefeldt)",
-  "license": "MIT",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/Andreas-Schoenefeldt/node-google-spreadsheet-translation-sync/blob/master/LICENSE-MIT"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/Andreas-Schoenefeldt/node-google-spreadsheet-translation-sync/issues"
   },

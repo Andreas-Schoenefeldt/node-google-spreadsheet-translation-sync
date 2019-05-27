@@ -21,10 +21,11 @@ module.exports.loadTranslationFile = function (filePath, callback) {
 }
 
 
-module.exports.updateTranslations = function (translationData, translationRootFolder, callback) {
+module.exports.updateTranslations = function (translationData, translationRootFolder, options, callback) {
   const path = require('path');
   const async = require('async');
   const mod = this;
+  const fileUtils = require('../util/file-utils');
 
   if (! fs.existsSync(translationRootFolder)) {
     throw new Error('The folder ' + translationRootFolder + ' does not exist');
@@ -35,7 +36,7 @@ module.exports.updateTranslations = function (translationData, translationRootFo
     // is it a comment or a real translation?
     if (locale !== constraints.commentCollumnName) {
 
-      const localeFileName = locale + '.json';
+      const localeFileName = fileUtils.buildTranslationFileName(constraints.TRANSLATION_FORMATS.LOCALE_JSON, locale, options);
       const file = path.resolve(translationRootFolder + '/' + localeFileName);
 
       mod.loadTranslationFile(file, function (translations) {
