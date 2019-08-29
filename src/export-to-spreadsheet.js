@@ -107,6 +107,8 @@ module.exports = function (translationFiles, options, callback) {
 
                   // we only override the spreadsheet from the code, if we actually have a value
                   if (expectedValue !== null && expectedValue !== undefined && cell.value !== expectedValue) {
+                    // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
+
                     cell.value = expectedValue
                     changedCells.push(cell)
                   }
