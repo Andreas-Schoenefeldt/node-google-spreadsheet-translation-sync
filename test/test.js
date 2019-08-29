@@ -29,10 +29,13 @@ csv.writeToPath(
 )
 
 
+const testFor = 'all'
+
 const tests = [
-   {
+
+  {
      name: 'should connect to the test google doc',
-     run: true,
+     run: 'connect',
      fnc: function (done) {
       this.timeout(timeout);
 
@@ -52,7 +55,7 @@ const tests = [
 
   {
     name: 'should not connect with wrong credentials',
-    run: true,
+    run: 'connect',
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -65,8 +68,76 @@ const tests = [
   },
 
   {
+    name: 'should upload changes in the test project',
+    run: 'upload',
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const fs = require('fs');
+      const options = {
+        translationFormat: 'locale_json',
+        spreadsheetId: testSheetId,
+        keyId: csvData[0][0],
+        fileBaseName: 'messages-',
+        credentials: accessData
+      }
+
+      const files = [];
+
+      const tempFolder = tmp.dirSync({prefix: 'trans-dyn-to-update'});
+
+      csvData[0].forEach( function (key, index) {
+        if (index > 0) {
+          const jsonFile = tempFolder.name + '/' + options.fileBaseName + key + '.json';
+          const data = {};
+          csvData.forEach(function (lines, i) {
+            if (i > 0 && lines[index]) {
+              data[lines[0]] = lines[index];
+            }
+          });
+
+          fs.writeFileSync(jsonFile, JSON.stringify(data));
+          files.push(jsonFile);
+        }
+      });
+
+      app.exportToSpreadsheet(files, options, function (err) {
+        const rimraf = require("rimraf");
+        expect(err).to.be.null;
+
+        if (!err) {
+          connector(testSheetId, accessData, function (err, sheet) {
+            expect(err).to.be.null
+            expect(sheet).to.be.an('object')
+
+            sheet.getRows({
+              offset: 0,
+              limit: csvData.length - 1
+            }, function (err, rows) {
+              expect(err).to.be.null
+              expect(rows).to.have.lengthOf(csvData.length - 1)
+              expect(rows[0].pl).to.equal(csvData[1][5])
+              expect(rows[0].default).to.equal('')
+              expect(rows[0].hu).to.equal('Elfogadom') // this was not part of the upload and should not be overwrittem
+              expect(rows[1].default).to.equal(csvData[2][1])
+              expect(rows[1].de).to.equal(csvData[2][2])
+              expect(rows[1].key).to.equal(csvData[2][0])
+              rimraf.sync(tempFolder.name);
+              done()
+            })
+          })
+        } else {
+          rimraf.sync(tempFolder.name);
+          done()
+        }
+
+      })
+    }
+  },
+
+  {
     name: 'should import updated locale_json keys in the test project',
-    run: true,
+    run: 'import',
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -96,7 +167,7 @@ const tests = [
 
   {
     name: 'should import updated gettext keys in the test project',
-    run: true,
+    run: 'import',
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -129,45 +200,6 @@ const tests = [
         done();
       });
     }
-  },
-
-  {
-    name: 'should upload changes in the test project',
-    run: true,
-    fnc: function (done) {
-      this.timeout(timeout);
-
-      app.exportToSpreadsheet(targetPath, testSheetId, accessData, function (targetPath, callback) {
-        callback(null, testFile)
-      }, function (err) {
-        expect(err).to.be.null
-
-        if (!err) {
-          connector(testSheetId, accessData, function (err, sheet) {
-            expect(err).to.be.null
-            expect(sheet).to.be.an('object')
-
-            sheet.getRows({
-              offset: 0,
-              limit: csvData.length - 1
-            }, function (err, rows) {
-              expect(err).to.be.null
-              expect(rows).to.have.lengthOf(csvData.length - 1)
-              expect(rows[0].pl).to.equal(csvData[1][5])
-              expect(rows[0].default).to.equal('')
-              expect(rows[0].hu).to.equal('Elfogadom') // this was not part of the upload and should not be overwrittem
-              expect(rows[1].default).to.equal(csvData[2][1])
-              expect(rows[1].de).to.equal(csvData[2][2])
-              expect(rows[1].key).to.equal(csvData[2][0])
-              done()
-            })
-          })
-        } else {
-          done()
-        }
-
-      })
-    }
   }
 ]
 
@@ -178,7 +210,7 @@ describe('#Export', function () {
   for (let i = 0; i < tests.length; i++) {
     const theTest = tests[i];
 
-    if (theTest.run) {
+    if (testFor === 'all' || theTest.run === testFor) {
       it(theTest.name, theTest.fnc);
     }
   }

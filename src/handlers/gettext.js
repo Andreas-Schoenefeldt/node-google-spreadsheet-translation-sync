@@ -24,7 +24,21 @@ module.exports.loadTranslationFile = function (filePath, callback) {
       })
     }
   });
+}
 
+module.exports.getTranslationKeys = function (filePath, callback) {
+
+  const translations = {};
+
+  this.loadTranslationFile(filePath, function (parsedObj) {
+    if (parsedObj.translations) {
+      Object.keys(parsedObj.translations['']).forEach(function (key) {
+        translations[key] = parsedObj.translations[''][key].msgstr;
+      });
+    }
+
+    callback(translations);
+  })
 }
 
 

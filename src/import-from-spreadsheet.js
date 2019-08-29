@@ -45,7 +45,8 @@ module.exports = function (translationRootFolder, options, callback) {
 
           // now we get the handler
           const h = require('./handler');
-          const handler = h.getHandler(translationFormat ? translationFormat : h.TRANSLATION_FORMATS.LOCALE_JSON );
+          const TRANSLATION_FORMATS = require('./util/constraints').TRANSLATION_FORMATS
+          const handler = h.getHandler(translationFormat ? translationFormat : TRANSLATION_FORMATS.LOCALE_JSON );
 
           handler.updateTranslations(translationData, translationRootFolder, options, callback);
 
