@@ -20,7 +20,7 @@ const testFile = tmpFile.name;
 const targetPath = path.basename(testFile);
 const csvData = [
   ['key', 'default', 'de', 'it', 'fr', 'pl'],
-  ['additional.news', null, null, null, null, 'czecz ' + Math.round(Math.random() * 10000)],
+  ['additional.news.' + + Math.round(Math.random() * 10000), null, null, null, null, 'czecz ' + Math.round(Math.random() * 10000)],
   ['some.key', 'a Key ' + Math.round(Math.random() * 10000), 'ein Schlüssel ' + Math.round(Math.random() * 10000)]
 ]
 
@@ -116,6 +116,7 @@ const tests = [
             }, function (err, rows) {
               expect(err).to.be.null
               expect(rows).to.have.lengthOf(csvData.length - 1)
+              expect(rows[0][options.keyId]).to.equal(csvData[1][0])
               expect(rows[0].pl).to.equal(csvData[1][5])
               expect(rows[0].default).to.equal('')
               expect(rows[0].hu).to.equal('Elfogadom') // this was not part of the upload and should not be overwrittem

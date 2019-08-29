@@ -26,6 +26,8 @@ module.exports = function (translationFiles, options, callback) {
 
   const dataHeaderIndexMap = {};
   const keyIndexMap = {};
+  keyIndexMap[options.keyId] = 0;
+
   const header =  [options.keyId];
   const data = [];
 
