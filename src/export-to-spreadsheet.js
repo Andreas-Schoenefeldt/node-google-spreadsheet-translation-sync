@@ -5,7 +5,7 @@
 
 /**
  * @param {[]} translationFiles - an array of files
- * @param {{translationFormat: string, mode: string, spreadsheetId: string, credentials: {}, keyId: string, fileBaseName: string}} options
+ * @param {{translationFormat: string, mode: string, spreadsheetId: string, credentials: {}, keyId: string, fileBaseName: string, namespaces: boolean, defaultLocaleName: string}} options
  * @param {function} callback
  */
 module.exports = function (translationFiles, options, callback) {
@@ -26,10 +26,18 @@ module.exports = function (translationFiles, options, callback) {
 
   const dataHeaderIndexMap = {};
   const keyIndexMap = {};
-  keyIndexMap[options.keyId] = 0;
 
-  const header =  [options.keyId];
+  const header = [];
   const data = [];
+
+  // is the namespace feature used?
+  if (options.namespaces) {
+    header.push('namespace');
+    keyIndexMap.namespace = header.length - 1;
+  }
+
+  header.push(options.keyId);
+  keyIndexMap[options.keyId] = header.length - 1;
 
   async.each(translationFiles, function (file, cb) {
 
@@ -37,21 +45,56 @@ module.exports = function (translationFiles, options, callback) {
 
     const extension = path.extname(file);
     const fileName = path.basename(file, extension);
-    const localeKey = fileName.substr(options.fileBaseName.length);
+    let namespace = '';
+    let localeKey;
 
-    header.push(localeKey);
-    keyIndexMap[localeKey] = header.length - 1;
+    // namespace based parsing required?
+    if (options.namespaces) {
+      const regex = /^(\w*?)([\-_])([\w\-]{2,5})$/gi
+      const matches = regex.exec(fileName);
+
+      if (!matches) {
+        // we assume, that the whole filename is the namespace
+        localeKey = options.defaultLocaleName ? options.defaultLocaleName : 'default'
+        namespace = fileName;
+      } else {
+        namespace = matches[1];
+        localeKey = matches[3];
+      }
+    } else {
+      localeKey = fileName.substr(options.fileBaseName.length);
+    }
+
+    if (dataHeaderIndexMap[namespace] === undefined) {
+      dataHeaderIndexMap[namespace] = {};
+    }
+
+    if (keyIndexMap[localeKey] === undefined) {
+      header.push(localeKey);
+      keyIndexMap[localeKey] = header.length - 1;
+    }
 
     handler.getTranslationKeys(file, function (tData) {
       // data is a key value
 
       Object.keys(tData).forEach(function (key) {
-        if (typeof (dataHeaderIndexMap[key]) === 'undefined') {
-          data.push([key]);
-          dataHeaderIndexMap[key] = data.length - 1
+        let rowIndex = dataHeaderIndexMap[namespace][key];
+
+        if (rowIndex === undefined) {
+          data.push([]);
+          dataHeaderIndexMap[namespace][key] = data.length - 1
+          rowIndex = dataHeaderIndexMap[namespace][key]
         }
 
-        data[dataHeaderIndexMap[key]][keyIndexMap[localeKey]] = tData[key];
+        data[rowIndex][keyIndexMap[localeKey]] = tData[key];
+
+        // namespace handling required?
+        if (options.namespaces) {
+          data[rowIndex][0] = namespace;
+          data[rowIndex][1] = key;
+        } else {
+          data[rowIndex][0] = key;
+        }
 
       });
 
@@ -66,17 +109,24 @@ module.exports = function (translationFiles, options, callback) {
 
       // let's sort the csvData before we upload
       data.sort(function (a, b) {
-        a = a[0].toLocaleLowerCase()
-        b = b[0].toLocaleLowerCase()
+        let A = a[0].toLocaleLowerCase()
+        let B = b[0].toLocaleLowerCase()
 
-        return a === b ? 0 : (a < b ? -1 : 1)
-      })
+        if (A === B) {
+
+          A = a[1].toLocaleLowerCase()
+          B = b[1].toLocaleLowerCase()
+
+          return A === B ? 0: (A < B ? -1 : 1);
+        } else {
+          return A < B ? -1 : 1;
+        }
+      });
 
       data.unshift(header);
 
       // upload to google
       connector(sheetId, credentials, function (err, sheet) {
-
         if (withoutError(err, callback)) {
 
           sheet.getCells({
@@ -86,7 +136,6 @@ module.exports = function (translationFiles, options, callback) {
             'max-col': sheet.colCount,
             'return-empty': true
           }, function (err, cells) {
-
             if (withoutError(err, callback)) {
 
               let changedCells = [];
@@ -100,15 +149,24 @@ module.exports = function (translationFiles, options, callback) {
                   if (cell.value) {
                     headerIndexMap[cell.col] = keyIndexMap[cell.value]
                     maxIndex = cell.col
+                  } else {
+                    // this looks like an initial upload, let's do it
+                    if (cell.col <= header.length) {
+                      let headerValue = header[cell.col - 1];
+                      headerIndexMap[cell.col] = keyIndexMap[headerValue];
+                      maxIndex = cell.col;
+                      cell.value = headerValue;
+                      changedCells.push(cell)
+                    }
                   }
                 } else if (cell.col <= maxIndex) {
 
                   // now we work with the actual data
                   // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
-                  let expectedValue = headerIndexMap[cell.col] !== undefined ? data[cell.row - 1][headerIndexMap[cell.col]] : null
+                  let expectedValue = headerIndexMap[cell.col] !== undefined ? data[cell.row - 1][headerIndexMap[cell.col]] : ''
 
-                  // we only override the spreadsheet from the code, if we actually have a value
-                  if (expectedValue !== null && expectedValue !== undefined && cell.value !== expectedValue) {
+                  // we override the spreadsheet from the code
+                  if (cell.value !== expectedValue) {
                     // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
 
                     cell.value = expectedValue

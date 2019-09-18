@@ -16,9 +16,9 @@ module.exports.getHandler = function (translationFormat) {
       break;
     case TRANSLATION_FORMATS.LOCALE_JSON:
       return require('./handlers/locale_json');
-      break;
     case TRANSLATION_FORMATS.GETTEXT:
       return require('./handlers/gettext');
-      break;
+    case TRANSLATION_FORMATS.PROPERTIES:
+      return require('./handlers/properties');
   }
 }
