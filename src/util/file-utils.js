@@ -4,13 +4,14 @@ const constraints = require('./constraints');
 /**
  *
  * @param {string} format
+ * @param {string} namespace
  * @param {string} locale
  * @param {{}} options
  * @returns {string}
  */
-module.exports.buildTranslationFileName = function (format, locale, options) {
-
-  const base = options.fileBaseName ? options.fileBaseName + '-' : '';
+module.exports.buildTranslationFileName = function (format, namespace, locale, options) {
+  const namespaceSeparator = options.namespaceSeparator ? options.namespaceSeparator : '-';
+  const base = options.namespaces ? namespace : (options.fileBaseName ? options.fileBaseName : '');
   let extension;
 
   switch (format) {
@@ -23,7 +24,15 @@ module.exports.buildTranslationFileName = function (format, locale, options) {
     case constraints.TRANSLATION_FORMATS.GETTEXT:
       extension = 'po';
       break;
+    case constraints.TRANSLATION_FORMATS.PROPERTIES:
+
+      if (options.defaultLocaleName === locale) {
+        locale = '';
+      }
+
+      extension = 'properties'
+      break;
   }
 
-  return base + locale + '.' + extension;
+  return base + (base && locale ? namespaceSeparator : '' ) + locale + '.' + extension;
 }

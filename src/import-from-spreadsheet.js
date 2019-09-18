@@ -21,8 +21,11 @@ module.exports = function (translationRootFolder, options, callback) {
         if (withoutError(err, callback)) {
 
           const headers = [];
-          const translationData = {}
+          const translationData = {};
+          const keyCellIndex = options.namespaces ? 1 : 0;
+          const namespaceCellIndex = options.namespaces ? 0 : -1
           let key;
+          let currentNamespace = 'default';
 
           cells.forEach(function (cell) {
             let rowIndex = cell.row - 1
@@ -31,17 +34,30 @@ module.exports = function (translationRootFolder, options, callback) {
 
             if (rowIndex === 0) {
               headers[cellIndex] = val;
-              if (cellIndex > 0) {
+              if (cellIndex > keyCellIndex) {
                 translationData[val] = {};
               }
             } else {
-              if (cellIndex === 0) {
-                key = val;
-              } else if (val && key) {
-                translationData[headers[cellIndex]][key] = val;
+
+              switch (cellIndex) {
+                default:
+                  if (val && key) {
+                    if (!translationData[headers[cellIndex]][currentNamespace]) {
+                      translationData[headers[cellIndex]][currentNamespace] = {};
+                    }
+
+                    translationData[headers[cellIndex]][currentNamespace][key] = val;
+                  }
+                  break;
+                case namespaceCellIndex:
+                  currentNamespace = val;
+                  break;
+                case keyCellIndex:
+                  key = val;
+                  break;
               }
             }
-          })
+          });
 
           // now we get the handler
           const h = require('./handler');

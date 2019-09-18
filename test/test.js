@@ -22,7 +22,7 @@ const testFile = tmpFile.name;
 const targetPath = path.basename(testFile);
 const csvData = [
   ['key', 'default', 'de', 'it', 'fr', 'pl', 'hu'],
-  ['additional.news.' + + Math.round(Math.random() * 10000), null, null, null, null, 'czecz ' + Math.round(Math.random() * 10000), 'Elfogadom'],
+  ['additional.news.' + Math.round(Math.random() * 10000), 'Additional News', null, null, null, 'czecz ' + Math.round(Math.random() * 10000), 'Elfogadom'],
   ['some.key', 'a Key ' + Math.round(Math.random() * 10000), 'ein Schlüssel ' + Math.round(Math.random() * 10000)]
 ]
 
@@ -31,7 +31,7 @@ csv.writeToPath(
 )
 
 
-const testFor = 'upload'
+const testFor = 'all'
 
 const tests = [
 
@@ -62,7 +62,6 @@ const tests = [
       this.timeout(timeout);
 
       connector('1eK_x1MKcoTQXXZhN4p3wuN94PVl2sGBh8KWuoBasBcM', accessData, function (err, sheet) {
-        console.log(sheet)
         expect(err).to.not.be.null
         done()
       })
@@ -85,6 +84,7 @@ const tests = [
         keyId: csvData[0][0],
         defaultLocaleName: 'default',
         namespaces: true,
+        namespaceSeparator: '_',
         credentials: accessData
       }
 
@@ -150,7 +150,7 @@ const tests = [
                   expect(rows).to.have.lengthOf((csvData.length - 1) * 2)
                   expect(rows[0][options.keyId]).to.equal(csvData[1][0])
                   expect(rows[0].pl).to.equal(csvData[1][5])
-                  expect(rows[0].default).to.equal('')
+                  expect(rows[0].default).to.equal(csvData[1][1])
                   expect(rows[0].hu).to.equal('Elfogadom')
                   expect(rows[0].namespace).to.equal(namespaces[0])
                   expect(rows[1].default).to.equal(csvData[2][1])
@@ -229,7 +229,7 @@ const tests = [
               expect(rows).to.have.lengthOf(csvData.length - 1)
               expect(rows[0][options.keyId]).to.equal(csvData[1][0])
               expect(rows[0].pl).to.equal(csvData[1][5])
-              expect(rows[0].default).to.equal('')
+              expect(rows[0].default).to.equal(csvData[1][1])
               expect(rows[0].hu).to.equal('Elfogadom') // this was not part of the upload and should not be overwrittem
               expect(rows[1].default).to.equal(csvData[2][1])
               expect(rows[1].de).to.equal(csvData[2][2])
@@ -244,6 +244,44 @@ const tests = [
         }
 
       })
+    }
+  },
+
+  {
+    name: 'should import updated properties keys in the test project',
+    run: 'import',
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const options = {
+        translationFormat: 'properties',
+        spreadsheetId: testSheetId_properties,
+        keyId: csvData[0][0],
+        defaultLocaleName: 'default',
+        namespaces: true,
+        namespaceSeparator: '_',
+        credentials: accessData
+      }
+
+      const translationRoot = path.resolve('./test/translations/' + options.translationFormat + '/');
+
+      app.importFromSpreadsheet(translationRoot, options, function (err) {
+        expect(err).to.be.null
+
+        if (!err) {
+          const testFile = path.resolve(translationRoot + '/other.properties');
+          const PropertiesReader = require('properties-reader');
+
+          const props = PropertiesReader(testFile);
+
+          // expect(Object.keys(props.getAllProperties()).length).to.equal(csvData.length - 1); // without the header
+          expect(props.get(csvData[2][0])).to.equal(csvData[2][1]);
+        }
+
+        done();
+      });
+
+
     }
   },
 
@@ -268,8 +306,8 @@ const tests = [
         if (!err) {
           const defaultKeys = require(testFile);
 
-          expect(Object.keys(defaultKeys).length).to.equal(325);
-          expect(defaultKeys.return).to.equal("Go back");
+          // expect(Object.keys(defaultKeys).length).to.equal(326);
+          expect(defaultKeys[csvData[2][0]]).to.equal(csvData[2][1]);
         }
 
         done();

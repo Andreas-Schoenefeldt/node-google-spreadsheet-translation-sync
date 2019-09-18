@@ -43,24 +43,30 @@ module.exports.updateTranslations = function (translationData, translationRootFo
   async.each(Object.keys(translationData), function(locale, done) {
 
     // is it a comment or a real translation?
-    if (locale !== constraints.commentCollumnName) {
+    if (locale.substr(0, constraints.commentCollumnName.length) !== constraints.commentCollumnName) {
 
-      const localeFileName = fileUtils.buildTranslationFileName(constraints.TRANSLATION_FORMATS.LOCALE_JSON, locale, options);
-      const file = path.resolve(translationRootFolder + '/' + localeFileName);
+      async.each(Object.keys(translationData[locale]), function (namespace, done2) {
 
-      mod.loadTranslationFile(file, function (translations) {
-        const potentiallyUpdatedTranslations = translationData[locale];
+        const localeFileName = fileUtils.buildTranslationFileName(constraints.TRANSLATION_FORMATS.LOCALE_JSON, namespace, locale, options);
+        const file = path.resolve(translationRootFolder + '/' + localeFileName);
 
-        Object.assign(translations, potentiallyUpdatedTranslations);
+        mod.loadTranslationFile(file, function (translations) {
+          const potentiallyUpdatedTranslations = translationData[locale][namespace];
 
-        // now we write
-        fs.writeFile(file, JSON.stringify(translations, null, 4), function (err) {
-          if (withoutError(err)) {
-            console.info('Updated translations of %o', localeFileName);
-          }
-          done();
+          Object.assign(translations, potentiallyUpdatedTranslations);
+
+          // now we write
+          fs.writeFile(file, JSON.stringify(translations, null, 4), function (err) {
+            if (withoutError(err)) {
+              console.info('Updated translations of %o', localeFileName);
+            }
+            done2();
+          })
         })
+      }, function () {
+        done();
       })
+
     } else {
       done();
     }

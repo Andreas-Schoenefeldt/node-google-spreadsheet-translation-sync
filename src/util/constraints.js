@@ -8,4 +8,4 @@ module.exports.TRANSLATION_FORMATS = formats;
 
 module.exports.translationFormats = [formats.LOCALE_JSON, formats.GETTEXT];
 
-module.exports.commentCollumnName = '# comment';
+module.exports.commentCollumnName = '#';

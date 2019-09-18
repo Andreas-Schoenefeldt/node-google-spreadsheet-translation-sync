@@ -52,73 +52,80 @@ module.exports.updateTranslations = function (translationData, translationRootFo
     throw new Error('The folder ' + translationRootFolder + ' does not exist');
   }
 
-  // console.log(translationData);
-
   async.each(Object.keys(translationData), function(locale, done) {
 
     // is it a comment or a real translation?
-    if (locale !== constraints.commentCollumnName) {
+    if (locale.substr(0, constraints.commentCollumnName.length) !== constraints.commentCollumnName) {
 
-      const localeFileName = fileUtils.buildTranslationFileName(constraints.TRANSLATION_FORMATS.GETTEXT, locale, options);
-      const file = path.resolve(translationRootFolder + '/' + localeFileName);
-      const moFile = path.resolve(translationRootFolder + '/' + localeFileName.replace('.po', '.mo'));
+      async.each(Object.keys(translationData[locale]), function (namespace, done2) {
 
-      mod.loadTranslationFile(file, function (parsedObj) {
+        const localeFileName = fileUtils.buildTranslationFileName(constraints.TRANSLATION_FORMATS.GETTEXT, namespace, locale, options);
+        const file = path.resolve(translationRootFolder + '/' + localeFileName);
+        const moFile = path.resolve(translationRootFolder + '/' + localeFileName.replace('.po', '.mo'));
 
-        // do we have a file?
-        if (!parsedObj.translations) {
-          parsedObj = {
-            "charset": "UTF-8",
+        mod.loadTranslationFile(file, function (parsedObj) {
 
-            "headers": {
-              "content-type": "text/plain; charset=UTF-8",
-              "plural-forms": "nplurals=2; plural=(n!=1);",
-              "X-Generator" : "node-google-spreadsheet-translation-update",
-              "Project-Id-Version": options.fileBaseName,
-              "Language" : locale
-            },
+          // do we have a file?
+          if (!parsedObj.translations) {
+            parsedObj = {
+              "charset": "UTF-8",
 
-            "translations": {
-              "": {
+              "headers": {
+                "content-type": "text/plain; charset=UTF-8",
+                "plural-forms": "nplurals=2; plural=(n!=1);",
+                "X-Generator": "node-google-spreadsheet-translation-update",
+                "Project-Id-Version": options.fileBaseName,
+                "Language": locale
+              },
+
+              "translations": {
+                "": {}
               }
             }
           }
-        }
 
-        const potentiallyUpdatedTranslations = translationData[locale];
+          const potentiallyUpdatedTranslations = translationData[locale][namespace];
 
-        // update our object
-        Object.keys(potentiallyUpdatedTranslations).forEach(function (key, index) {
-          if (!parsedObj.translations[''][key]) {
-            parsedObj.translations[''][key] = {
-              "msgid": key,
-              "msgstr": [],
-              "comments": {}
-            }
+          if (potentiallyUpdatedTranslations) {
+            // update our object
+            Object.keys(potentiallyUpdatedTranslations).forEach(function (key, index) {
+              if (!parsedObj.translations[''][key]) {
+                parsedObj.translations[''][key] = {
+                  "msgid": key,
+                  "msgstr": [],
+                  "comments": {}
+                }
+              }
+
+              parsedObj.translations[''][key].msgstr[0] = potentiallyUpdatedTranslations[key];
+
+              // do we have a comment?
+              if (translationData[constraints.commentCollumnName] && translationData[constraints.commentCollumnName][key]) {
+                if (!parsedObj.translations[''][key].comments) {
+                  parsedObj.translations[''][key].comments = {};
+                }
+
+                parsedObj.translations[''][key].comments.translator = translationData[constraints.commentCollumnName][key];
+              }
+            });
+
+            // now we write
+
+            const output = gettextParser.po.compile(parsedObj, {sort: true});
+            fs.writeFileSync(file, output);
+
+            const mo = gettextParser.mo.compile(parsedObj);
+            fs.writeFileSync(moFile, mo);
+
+            console.info('Updated translations of %o', localeFileName);
+          } else {
+            console.info('Ignored unchanged %o', localeFileName);
           }
 
-          parsedObj.translations[''][key].msgstr[0] = potentiallyUpdatedTranslations[key];
-
-          // do we have a comment?
-          if (translationData[constraints.commentCollumnName] && translationData[constraints.commentCollumnName][key]) {
-            if (!parsedObj.translations[''][key].comments) {
-              parsedObj.translations[''][key].comments = {};
-            }
-
-            parsedObj.translations[''][key].comments.translator = translationData[constraints.commentCollumnName][key];
-          }
+          done2();
         });
 
-        // now we write
-
-        const output = gettextParser.po.compile(parsedObj, {sort: true});
-        fs.writeFileSync(file, output);
-
-        const mo = gettextParser.mo.compile(parsedObj);
-        fs.writeFileSync(moFile, mo);
-
-        console.info('Updated translations of %o', localeFileName);
-
+      }, function () {
         done();
       })
     } else {

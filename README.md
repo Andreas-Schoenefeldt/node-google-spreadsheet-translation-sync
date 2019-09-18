@@ -75,6 +75,12 @@ Default value: `false`
 
 If multiple base filenames are used in a project, this can be turned on, to still have the properties uploaded to one spreadsheet. It will expect the first collumn of the sheet to be filled with the namespace. 
 
+#### options.namespaceSeparator
+Type: `String`    
+Default value: '-'
+
+If `namespaces` or `fileBaseName` is used, this is the separating character. For example the first `_` in `messages_en_US.json`.   
+
 #### options.translationFormat
 Type: `Enum`   
 Possible Values: 
