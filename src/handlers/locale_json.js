@@ -58,7 +58,7 @@ module.exports.updateTranslations = function (translationData, translationRootFo
           // now we write
           fs.writeFile(file, JSON.stringify(translations, null, 4), function (err) {
             if (withoutError(err)) {
-              console.info('Updated translations of %o', localeFileName);
+              // console.info('Updated translations of %o', localeFileName);
             }
             done2();
           })

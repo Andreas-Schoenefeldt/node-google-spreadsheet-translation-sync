@@ -26,15 +26,25 @@ const csvData = [
   ['some.key', 'a Key ' + Math.round(Math.random() * 10000), 'ein Schlüssel ' + Math.round(Math.random() * 10000)]
 ]
 
+// this provokes the "Cannot read property 'toLocaleLowerCase' of undefined" ERROR
+const frOnlyLine = ['zz.somehow', undefined, '?'];
+frOnlyLine[4] = 'bon';
+const frOnlyLine2 = ['ZZ.someHow', undefined, '?'];
+frOnlyLine2[4] = 'bon!';
+
+csvData.push(frOnlyLine);
+csvData.push(frOnlyLine2);
+
+
 csv.writeToPath(
   testFile, csvData, {headers: true}
 )
 
 
+// const testFor = 'all'
 const testFor = 'all'
 
 const tests = [
-
   {
      name: 'should connect to the test google doc',
      run: 'connect',
@@ -91,6 +101,7 @@ const tests = [
       const namespaces = ['messages', 'other'];
       const fileItems = [];
       const files = [];
+      const entryLength = csvData.length - 1;
 
       const tempFolder = tmp.dirSync({prefix: 'trans-properties-to-update'});
 
@@ -156,7 +167,8 @@ const tests = [
                   expect(rows[1].default).to.equal(csvData[2][1])
                   expect(rows[1].de).to.equal(csvData[2][2])
                   expect(rows[1].key).to.equal(csvData[2][0])
-                  expect(rows[2].namespace).to.equal(namespaces[1])
+                  // this should be already the next namespace
+                  expect(rows[entryLength].namespace).to.equal(namespaces[1])
                   rimraf.sync(tempFolder.name);
                   done()
                 })
@@ -179,7 +191,7 @@ const tests = [
   },
 
   {
-    name: 'should upload changes in the test project',
+    name: 'should upload changes in the json test project',
     run: 'upload',
     fnc: function (done) {
       this.timeout(timeout);

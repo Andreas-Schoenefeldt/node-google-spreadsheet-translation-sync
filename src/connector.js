@@ -19,7 +19,6 @@ module.exports = function (sheetId, credentials, callback) {
   // docu: https://www.npmjs.com/package/google-spreadsheet
   async.series([
     function setAuth (step) {
-      console.log('authenticating...')
       doc.useServiceAccountAuth(credentials, step)
     },
 
@@ -28,7 +27,7 @@ module.exports = function (sheetId, credentials, callback) {
         if (withoutError(err, callback)) {
           console.log('Loaded doc: ' + info.title + ' by ' + info.author.email)
           sheet = info.worksheets[0]
-          console.log('sheet 1: ' + sheet.title + ' ' + sheet.rowCount + 'x' + sheet.colCount)
+          // console.log('sheet 1: ' + sheet.title + ' ' + sheet.rowCount + 'x' + sheet.colCount)
           callback(null, sheet)
           step()
         }

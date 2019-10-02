@@ -105,17 +105,17 @@ module.exports = function (translationFiles, options, callback) {
 
     if (withoutError(err, callback)) {
       const connector = require('./connector')
-      console.log('data read done - start uploading')
+      // console.log('data read done - start uploading')
 
       // let's sort the csvData before we upload
       data.sort(function (a, b) {
-        let A = a[0].toLocaleLowerCase()
-        let B = b[0].toLocaleLowerCase()
+        let A = a[0] ? a[0].toLocaleLowerCase() : ''
+        let B = b[0] ? b[0].toLocaleLowerCase() : ''
 
         if (A === B) {
 
-          A = a[1].toLocaleLowerCase()
-          B = b[1].toLocaleLowerCase()
+          A = a[1] ? a[1].toLocaleLowerCase() : ''
+          B = b[1] ? b[1].toLocaleLowerCase() : ''
 
           return A === B ? 0: (A < B ? -1 : 1);
         } else {
@@ -178,11 +178,10 @@ module.exports = function (translationFiles, options, callback) {
 
               if (changedCells.length > 0) {
 
-                console.log('Updating %s changed cells', changedCells.length)
+                // console.log('Updating %s changed cells', changedCells.length)
 
                 sheet.bulkUpdateCells(changedCells, function (err) {
                   if (withoutError(err, callback)) {
-                    console.log('SUCCESS: Data was updated')
                     callback(null)
                   }
                 })

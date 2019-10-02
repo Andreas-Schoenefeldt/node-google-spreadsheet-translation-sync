@@ -117,9 +117,9 @@ module.exports.updateTranslations = function (translationData, translationRootFo
             const mo = gettextParser.mo.compile(parsedObj);
             fs.writeFileSync(moFile, mo);
 
-            console.info('Updated translations of %o', localeFileName);
+            // console.info('Updated translations of %o', localeFileName);
           } else {
-            console.info('Ignored unchanged %o', localeFileName);
+            // console.info('Ignored unchanged %o', localeFileName);
           }
 
           done2();
