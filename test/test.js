@@ -1,31 +1,32 @@
 'use strict'
 
-const path = require('path')
-const expect = require('chai').expect
-const app = require('../index')
-const connector = require('../src/connector')
-const accessData = require('./data/google-test-access.json')
+const path = require('path');
+const fs = require('fs');
+const expect = require('chai').expect;
+const app = require('../index');
+const connector = require('../src/connector');
+const accessData = require('./data/google-test-access.json');
 const tmp = require('tmp');
 const async = require('async');
 
 const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI';
 const testWorksheetId = '1209225803';
-const testSheetId_gettext = '1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc'
-const testSheetId_properties = '1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE'
+const testSheetId_gettext = '1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc';
+const testSheetId_properties = '1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE';
 const timeout = 20000;
 
 // preparations
 
 var tmpFile = tmp.fileSync({postfix: '.csv'});
 
-const csv = require('fast-csv')
+const csv = require('fast-csv');
 const testFile = tmpFile.name;
 const targetPath = path.basename(testFile);
 const csvData = [
   ['key', 'default', 'de', 'it', 'fr', 'pl', 'hu'],
   ['additional.news.' + Math.round(Math.random() * 10000), 'Additional News', null, null, null, 'czecz ' + Math.round(Math.random() * 10000), 'Elfogadom'],
   ['some.key', 'a Key ' + Math.round(Math.random() * 10000), 'ein Schlüssel ' + Math.round(Math.random() * 10000)]
-]
+];
 
 // this provokes the "Cannot read property 'toLocaleLowerCase' of undefined" ERROR
 const frOnlyLine = ['zz.somehow', undefined, '?'];
@@ -41,9 +42,16 @@ csv.writeToPath(
   testFile, csvData, {headers: true}
 );
 
+function ensureFolder (folder) {
+  if (!fs.existsSync(folder)){
+    fs.mkdirSync(folder);
+  }
+  return folder;
+}
 
-// const testFor = 'all' // 'connect', 'upload'
-const testFor = 'upload';
+
+// const testFor = 'all' // 'connect', 'upload', 'import'
+const testFor = 'all';
 
 const tests = [
   {
@@ -256,21 +264,21 @@ const tests = [
 
         if (!err) {
           connector(options.spreadsheetId, options.gid, accessData, function (err, sheet) {
-            expect(err).to.be.null
-            expect(sheet).to.be.an('object')
+            expect(err).to.be.null;
+            expect(sheet).to.be.an('object');
 
             sheet.getRows({
               offset: 0,
               limit: csvData.length - 1
             }).then(function (rows) {
-              expect(rows).to.have.lengthOf(csvData.length - 1)
-              expect(rows[0][options.keyId]).to.equal(csvData[1][0])
-              expect(rows[0].pl).to.equal(csvData[1][5])
-              expect(rows[0].default).to.equal(csvData[1][1])
-              expect(rows[0].hu).to.equal('Elfogadom') // this was not part of the upload and should not be overwrittem
-              expect(rows[1].default).to.equal(csvData[2][1])
-              expect(rows[1].de).to.equal(csvData[2][2])
-              expect(rows[1].key).to.equal(csvData[2][0])
+              expect(rows).to.have.lengthOf(csvData.length - 1);
+              expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
+              expect(rows[0].pl).to.equal(csvData[1][5]);
+              expect(rows[0].default).to.equal(csvData[1][1]);
+              expect(rows[0].hu).to.equal('Elfogadom'); // this was not part of the upload and should not be overwrittem
+              expect(rows[1].default).to.equal(csvData[2][1]);
+              expect(rows[1].de).to.equal(csvData[2][2]);
+              expect(rows[1].key).to.equal(csvData[2][0]);
               rimraf.sync(tempFolder.name);
               done()
             })
@@ -300,10 +308,10 @@ const tests = [
         credentials: accessData
       }
 
-      const translationRoot = path.resolve('./test/translations/' + options.translationFormat + '/');
+      const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
 
       app.importFromSpreadsheet(translationRoot, options, function (err) {
-        expect(err).to.be.null
+        expect(err).to.be.null;
 
         if (!err) {
           const testFile = path.resolve(translationRoot + '/other.properties');
@@ -332,9 +340,9 @@ const tests = [
         translationFormat: 'locale_json',
         spreadsheetId: testSheetId,
         credentials: accessData
-      }
+      };
 
-      const translationRoot = path.resolve('./test/translations/' + options.translationFormat + '/');
+      const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
       const testFile = path.resolve(translationRoot + '/default.json');
 
       app.importFromSpreadsheet(translationRoot, options, function (err) {
@@ -365,9 +373,9 @@ const tests = [
         fileBaseName: baseName,
         spreadsheetId: testSheetId_gettext,
         credentials: accessData
-      }
+      };
 
-      const translationRoot = path.resolve('./test/translations/' + options.translationFormat + '/');
+      const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
       const testFile = path.resolve(translationRoot + '/' + baseName + '-en.po');
 
       app.importFromSpreadsheet(translationRoot, options, function (err) {
@@ -388,7 +396,7 @@ const tests = [
       });
     }
   }
-]
+];
 
 
 // run the test
