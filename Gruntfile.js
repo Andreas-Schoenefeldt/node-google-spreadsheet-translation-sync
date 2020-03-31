@@ -75,6 +75,14 @@ module.exports = function(grunt) {
     shell: {
       publish_npm: {
         command: 'npm publish'
+      },
+      merge: {
+        command: [
+          'git checkout develop',
+          'git pull origin develop',
+          'git merge master',
+          'git push'
+        ].join('&&')
       }
     }
 
@@ -86,7 +94,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-shell');
 
   grunt.registerTask('build', 'Production Build', function() {
-    grunt.task.run('prompt', 'bump', 'shell:publish_npm');
+    grunt.task.run('prompt', 'bump', 'shell:publish_npm', 'shell:merge');
   });
 
 };
