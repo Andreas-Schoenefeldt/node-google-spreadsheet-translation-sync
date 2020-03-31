@@ -45,7 +45,7 @@
     "async": "^2.6.3",
     "fast-csv": "^2.5.0",
     "gettext-parser": "^4.0.2",
-    "google-spreadsheet": "^2.0.8",
+    "google-spreadsheet": "^3.0.10",
     "mkdirp": "^0.5.1",
     "properties-reader": "github:Andreas-Schoenefeldt/properties#master",
     "shelljs": "^0.7.8",

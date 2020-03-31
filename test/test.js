@@ -8,7 +8,8 @@ const accessData = require('./data/google-test-access.json')
 const tmp = require('tmp');
 const async = require('async');
 
-const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI'
+const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI';
+const testWorksheetId = '1209225803';
 const testSheetId_gettext = '1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc'
 const testSheetId_properties = '1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE'
 const timeout = 20000;
@@ -38,11 +39,11 @@ csvData.push(frOnlyLine2);
 
 csv.writeToPath(
   testFile, csvData, {headers: true}
-)
+);
 
 
-// const testFor = 'all'
-const testFor = 'all'
+// const testFor = 'all' // 'connect', 'upload'
+const testFor = 'upload';
 
 const tests = [
   {
@@ -51,15 +52,15 @@ const tests = [
      fnc: function (done) {
       this.timeout(timeout);
 
-      connector(testSheetId, accessData, function (err, sheet) {
+      connector(testSheetId, null, accessData, function (err, sheet) {
 
         if (err) {
-          console.log('Connection Error: ')
+          console.log('Connection Error: ');
           console.log(err);
         }
 
-        expect(err).to.be.null
-        expect(sheet).to.be.an('object')
+        expect(err).to.be.null;
+        expect(sheet).to.be.an('object');
         done()
       })
     }
@@ -71,10 +72,36 @@ const tests = [
     fnc: function (done) {
       this.timeout(timeout);
 
-      connector('1eK_x1MKcoTQXXZhN4p3wuN94PVl2sGBh8KWuoBasBcM', accessData, function (err, sheet) {
+      connector('1eK_x1MKcoTQXXZhN4p3wuN94PVl2sGBh8KWuoBasBcM', null, accessData, function (err, sheet) {
         expect(err).to.not.be.null
         done()
       })
+    }
+  },
+
+  {
+    name: 'should connect to a specific sheet',
+    run: 'connect',
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      connector(
+        testSheetId,
+        testWorksheetId,
+        accessData,
+
+        /**
+         *
+         * @param err
+         * @param {GoogleSpreadsheetWorksheet} sheet
+         */
+        function (err, sheet) {
+          expect(err).to.be.null;
+          expect(sheet).to.not.be.null;
+          expect(sheet.sheetId).to.equal(parseInt(testWorksheetId));
+          done()
+        }
+      )
     }
   },
 
@@ -149,26 +176,25 @@ const tests = [
             expect(err).to.be.null;
 
             if (!err) {
-              connector(options.spreadsheetId, accessData, function (err, sheet) {
-                expect(err).to.be.null
-                expect(sheet).to.be.an('object')
+              connector(options.spreadsheetId, options.gid, accessData, function (err, sheet) {
+                expect(err).to.be.null;
+                expect(sheet).to.be.an('object');
 
                 sheet.getRows({
                   offset: 0,
                   limit: (csvData.length - 1) * namespaces.length + 1
-                }, function (err, rows) {
-                  expect(err).to.be.null
-                  expect(rows).to.have.lengthOf((csvData.length - 1) * 2)
-                  expect(rows[0][options.keyId]).to.equal(csvData[1][0])
-                  expect(rows[0].pl).to.equal(csvData[1][5])
-                  expect(rows[0].default).to.equal(csvData[1][1])
-                  expect(rows[0].hu).to.equal('Elfogadom')
-                  expect(rows[0].namespace).to.equal(namespaces[0])
-                  expect(rows[1].default).to.equal(csvData[2][1])
-                  expect(rows[1].de).to.equal(csvData[2][2])
-                  expect(rows[1].key).to.equal(csvData[2][0])
+                }).then(function (rows) {
+                  expect(rows).to.have.lengthOf((csvData.length - 1) * 2);
+                  expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
+                  expect(rows[0].pl).to.equal(csvData[1][5]);
+                  expect(rows[0].default).to.equal(csvData[1][1]);
+                  expect(rows[0].hu).to.equal('Elfogadom');
+                  expect(rows[0].namespace).to.equal(namespaces[0]);
+                  expect(rows[1].default).to.equal(csvData[2][1]);
+                  expect(rows[1].de).to.equal(csvData[2][2]);
+                  expect(rows[1].key).to.equal(csvData[2][0]);
                   // this should be already the next namespace
-                  expect(rows[entryLength].namespace).to.equal(namespaces[1])
+                  expect(rows[entryLength].namespace).to.equal(namespaces[1]);
                   rimraf.sync(tempFolder.name);
                   done()
                 })
@@ -229,15 +255,14 @@ const tests = [
         expect(err).to.be.null;
 
         if (!err) {
-          connector(testSheetId, accessData, function (err, sheet) {
+          connector(options.spreadsheetId, options.gid, accessData, function (err, sheet) {
             expect(err).to.be.null
             expect(sheet).to.be.an('object')
 
             sheet.getRows({
               offset: 0,
               limit: csvData.length - 1
-            }, function (err, rows) {
-              expect(err).to.be.null
+            }).then(function (rows) {
               expect(rows).to.have.lengthOf(csvData.length - 1)
               expect(rows[0][options.keyId]).to.equal(csvData[1][0])
               expect(rows[0].pl).to.equal(csvData[1][5])

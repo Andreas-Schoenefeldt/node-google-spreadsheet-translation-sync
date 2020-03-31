@@ -5,7 +5,7 @@
 
 /**
  * @param {[]} translationFiles - an array of files
- * @param {{translationFormat: string, mode: string, spreadsheetId: string, credentials: {}, keyId: string, fileBaseName: string, namespaces: boolean, defaultLocaleName: string}} options
+ * @param {{translationFormat: string, mode: string, spreadsheetId: string, gid : string, credentials: {}, keyId: string, fileBaseName: string, namespaces: boolean, defaultLocaleName: string}} options
  * @param {function} callback
  */
 module.exports = function (translationFiles, options, callback) {
@@ -101,21 +101,21 @@ module.exports = function (translationFiles, options, callback) {
       cb();
     })
   }, function (err) {
-    const withoutError = require('./helpers').withoutError
+    const withoutError = require('./helpers').withoutError;
 
     if (withoutError(err, callback)) {
-      const connector = require('./connector')
+      const connector = require('./connector');
       // console.log('data read done - start uploading')
 
       // let's sort the csvData before we upload
       data.sort(function (a, b) {
-        let A = a[0] ? a[0].toLocaleLowerCase() : ''
-        let B = b[0] ? b[0].toLocaleLowerCase() : ''
+        let A = a[0] ? a[0].toLocaleLowerCase() : '';
+        let B = b[0] ? b[0].toLocaleLowerCase() : '';
 
         if (A === B) {
 
-          A = a[1] ? a[1].toLocaleLowerCase() : ''
-          B = b[1] ? b[1].toLocaleLowerCase() : ''
+          A = a[1] ? a[1].toLocaleLowerCase() : '';
+          B = b[1] ? b[1].toLocaleLowerCase() : '';
 
           return A === B ? 0: (A < B ? -1 : 1);
         } else {
@@ -126,76 +126,76 @@ module.exports = function (translationFiles, options, callback) {
       data.unshift(header);
 
       // upload to google
-      connector(sheetId, credentials, function (err, sheet) {
+      connector(sheetId, options.gid, credentials,
+      /**
+       *
+       * @param err
+       * @param {GoogleSpreadsheetWorksheet} sheet
+       */
+      function (err, sheet) {
         if (withoutError(err, callback)) {
 
-          sheet.getCells({
-            'min-row': 1,
-            'max-row': data.length, // because row index is 1 based
-            'min-col': 1,
-            'max-col': sheet.colCount,
-            'return-empty': true
-          }, function (err, cells) {
-            if (withoutError(err, callback)) {
+          sheet.loadCells({
+            'startRowIndex': 0,
+            'endRowIndex': data.length,
+            'startColumnIndex': 0,
+            'endColumnIndex': sheet.columnCount
+          }).then(
+              function () {
+                let rowIndex;
+                let cellIndex;
+                let headerIndexMap = {};
+                let maxIndex = 0;
 
-              let changedCells = [];
-              let headerIndexMap = {};
-              let maxIndex = 0;
+                for (rowIndex = 0; rowIndex < data.length; rowIndex++) {
+                  for (cellIndex = 0; cellIndex < sheet.columnCount; cellIndex++) {
+                    let cell = sheet.getCell(rowIndex, cellIndex);
 
-              cells.forEach(function (cell) {
+                    if (rowIndex === 0) {
+                      // this is the header row
+                      if (cell.value) {
+                        headerIndexMap[cellIndex] = keyIndexMap[cell.value];
+                        maxIndex = cellIndex
+                      } else {
+                        // this looks like an initial upload, let's do it
+                        if (cellIndex <= header.length) {
+                          let headerValue = header[cellIndex];
+                          headerIndexMap[cellIndex] = keyIndexMap[headerValue];
+                          maxIndex = cellIndex;
+                          cell.value = headerValue;
+                        }
+                      }
+                    } else if (cellIndex <= maxIndex) {
 
-                if (cell.row === 1) {
-                  // this is the header row
-                  if (cell.value) {
-                    headerIndexMap[cell.col] = keyIndexMap[cell.value]
-                    maxIndex = cell.col
-                  } else {
-                    // this looks like an initial upload, let's do it
-                    if (cell.col <= header.length) {
-                      let headerValue = header[cell.col - 1];
-                      headerIndexMap[cell.col] = keyIndexMap[headerValue];
-                      maxIndex = cell.col;
-                      cell.value = headerValue;
-                      changedCells.push(cell)
+                      // now we work with the actual data
+                      // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
+                      let expectedValue = headerIndexMap[cellIndex] !== undefined ? data[rowIndex][headerIndexMap[cellIndex]] : '';
+
+                      // we override the spreadsheet from the code
+                      if (cell.value !== expectedValue) {
+                        // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
+
+                        cell.value = expectedValue;
+                      }
                     }
-                  }
-                } else if (cell.col <= maxIndex) {
 
-                  // now we work with the actual data
-                  // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
-                  let expectedValue = headerIndexMap[cell.col] !== undefined ? data[cell.row - 1][headerIndexMap[cell.col]] : ''
-
-                  // we override the spreadsheet from the code
-                  if (cell.value !== expectedValue) {
-                    // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
-
-                    cell.value = expectedValue
-                    changedCells.push(cell)
                   }
                 }
 
-              })
+                sheet.saveUpdatedCells().then(function () {
+                  callback(null);
+                }).catch(function (err) {
 
-              if (changedCells.length > 0) {
+                  console.log(err);
 
-                // console.log('Updating %s changed cells', changedCells.length)
-
-                sheet.bulkUpdateCells(changedCells, function (err) {
-                  if (withoutError(err, callback)) {
-                    callback(null)
-                  }
-                })
-
-              } else {
-                console.log('Nothing changed since the last run')
-                callback(null)
+                  callback(err);
+                });
               }
-            }
-          })
+          ).catch(function (err) {
+            callback(err);
+          });
         }
       })
     }
   });
-
-
-}
+};

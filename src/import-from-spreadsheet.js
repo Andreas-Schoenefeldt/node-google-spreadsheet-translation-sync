@@ -2,73 +2,81 @@
 
 module.exports = function (translationRootFolder, options, callback) {
 
-  const connector = require('./connector')
-  const withoutError = require('./helpers').withoutError
-  const sheetId = options.spreadsheetId
-  const credentials = options.credentials
-  const translationFormat = options.translationFormat
+  const connector = require('./connector');
+  const withoutError = require('./helpers').withoutError;
+  const sheetId = options.spreadsheetId;
+  const credentials = options.credentials;
+  const translationFormat = options.translationFormat;
 
-  connector(sheetId, credentials, function (err, sheet) {
+  connector(sheetId, options.gid, credentials, function (err, sheet) {
 
     if (withoutError(err, callback)) {
 
       /** @var {SpreadsheetWorksheet} sheet */
-      sheet.getCells({
-        'min-row': 1,
-        'max-row': sheet.rowCount,
-        'return-empty': false
-      }, function (err, cells) {
-        if (withoutError(err, callback)) {
+      sheet.loadCells({
+        'startRowIndex': 0,
+        'endRowIndex': sheet.rowCount
+      }).then(
+          function () {
 
-          const headers = [];
-          const translationData = {};
-          const keyCellIndex = options.namespaces ? 1 : 0;
-          const namespaceCellIndex = options.namespaces ? 0 : -1
-          let key;
-          let currentNamespace = 'default';
+            const columnCount = sheet.columnCount;
 
-          cells.forEach(function (cell) {
-            let rowIndex = cell.row - 1
-            let cellIndex = cell.col - 1
-            let val = cell.value.trim();
+            const headers = [];
+            const translationData = {};
+            const keyCellIndex = options.namespaces ? 1 : 0;
+            const namespaceCellIndex = options.namespaces ? 0 : -1;
+            let key;
+            let currentNamespace = 'default';
+            let rowIndex;
+            let cellIndex;
 
-            if (rowIndex === 0) {
-              headers[cellIndex] = val;
-              if (cellIndex > keyCellIndex) {
-                translationData[val] = {};
-              }
-            } else {
+            // loop over all the cells
 
-              switch (cellIndex) {
-                default:
-                  if (val && key) {
-                    if (!translationData[headers[cellIndex]][currentNamespace]) {
-                      translationData[headers[cellIndex]][currentNamespace] = {};
-                    }
+            for (rowIndex = 0; rowIndex < sheet.rowCount; rowIndex++) {
+              for (cellIndex = 0; cellIndex < columnCount; cellIndex++) {
+                let cell = sheet.getCell(rowIndex, cellIndex);
+                let val = cell.value.trim();
 
-                    translationData[headers[cellIndex]][currentNamespace][key] = val;
+                if (rowIndex === 0) {
+                  headers[cellIndex] = val;
+                  if (cellIndex > keyCellIndex) {
+                    translationData[val] = {};
                   }
-                  break;
-                case namespaceCellIndex:
-                  currentNamespace = val;
-                  break;
-                case keyCellIndex:
-                  key = val;
-                  break;
+                } else {
+
+                  switch (cellIndex) {
+                    default:
+                      if (val && key) {
+                        if (!translationData[headers[cellIndex]][currentNamespace]) {
+                          translationData[headers[cellIndex]][currentNamespace] = {};
+                        }
+
+                        translationData[headers[cellIndex]][currentNamespace][key] = val;
+                      }
+                      break;
+                    case namespaceCellIndex:
+                      currentNamespace = val;
+                      break;
+                    case keyCellIndex:
+                      key = val;
+                      break;
+                  }
+                }
               }
             }
-          });
 
-          // now we get the handler
-          const h = require('./handler');
-          const TRANSLATION_FORMATS = require('./util/constraints').TRANSLATION_FORMATS
-          const handler = h.getHandler(translationFormat ? translationFormat : TRANSLATION_FORMATS.LOCALE_JSON );
+            // now we get the handler
+            const h = require('./handler');
+            const TRANSLATION_FORMATS = require('./util/constraints').TRANSLATION_FORMATS;
+            const handler = h.getHandler(translationFormat ? translationFormat : TRANSLATION_FORMATS.LOCALE_JSON );
 
-          handler.updateTranslations(translationData, translationRootFolder, options, callback);
+            handler.updateTranslations(translationData, translationRootFolder, options, callback);
 
-        }
-      })
+          },
+          function (err) {
+            callback(err);
+          }
+      );
     }
   })
-
-}
+};
