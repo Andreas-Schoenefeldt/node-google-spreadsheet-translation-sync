@@ -2,7 +2,7 @@ const formats = {
   LOCALE_JSON: 'locale_json',
   GETTEXT: 'gettext',
   PROPERTIES: 'properties'
-}
+};
 
 module.exports.TRANSLATION_FORMATS = formats;
 
