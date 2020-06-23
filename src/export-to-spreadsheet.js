@@ -135,65 +135,68 @@ module.exports = function (translationFiles, options, callback) {
       function (err, sheet) {
         if (withoutError(err, callback)) {
 
-          sheet.loadCells({
-            'startRowIndex': 0,
-            'endRowIndex': data.length,
-            'startColumnIndex': 0,
-            'endColumnIndex': sheet.columnCount
-          }).then(
-              function () {
-                let rowIndex;
-                let cellIndex;
-                let headerIndexMap = {};
-                let maxIndex = 0;
+          if (sheet.rowCount < data.length) {
+            // this is an error
+            callback(`The selected sheet ${options.gid} has not enough rows for the data. It needs ${data.length - sheet.rowCount} rows more.`);
+          } else {
 
-                for (rowIndex = 0; rowIndex < data.length; rowIndex++) {
-                  for (cellIndex = 0; cellIndex < sheet.columnCount; cellIndex++) {
-                    let cell = sheet.getCell(rowIndex, cellIndex);
+            sheet.loadCells({
+              'startRowIndex': 0,
+              'endRowIndex': data.length,
+              'startColumnIndex': 0,
+              'endColumnIndex': sheet.columnCount
+            }).then(
+                function () {
+                  let rowIndex;
+                  let cellIndex;
+                  let headerIndexMap = {};
+                  let maxIndex = 0;
 
-                    if (rowIndex === 0) {
-                      // this is the header row
-                      if (cell.value) {
-                        headerIndexMap[cellIndex] = keyIndexMap[cell.value];
-                        maxIndex = cellIndex
-                      } else {
-                        // this looks like an initial upload, let's do it
-                        if (cellIndex <= header.length) {
-                          let headerValue = header[cellIndex];
-                          headerIndexMap[cellIndex] = keyIndexMap[headerValue];
-                          maxIndex = cellIndex;
-                          cell.value = headerValue;
+                  for (rowIndex = 0; rowIndex < data.length; rowIndex++) {
+                    for (cellIndex = 0; cellIndex < sheet.columnCount; cellIndex++) {
+                      let cell = sheet.getCell(rowIndex, cellIndex);
+
+                      if (rowIndex === 0) {
+                        // this is the header row
+                        if (cell.value) {
+                          headerIndexMap[cellIndex] = keyIndexMap[cell.value];
+                          maxIndex = cellIndex
+                        } else {
+                          // this looks like an initial upload, let's do it
+                          if (cellIndex <= header.length) {
+                            let headerValue = header[cellIndex];
+                            headerIndexMap[cellIndex] = keyIndexMap[headerValue];
+                            maxIndex = cellIndex;
+                            cell.value = headerValue;
+                          }
+                        }
+                      } else if (cellIndex <= maxIndex) {
+
+                        // now we work with the actual data
+                        // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
+                        let expectedValue = headerIndexMap[cellIndex] !== undefined ? data[rowIndex][headerIndexMap[cellIndex]] : '';
+
+                        // we override the spreadsheet from the code
+                        if (cell.value !== expectedValue) {
+                          // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
+
+                          cell.value = expectedValue;
                         }
                       }
-                    } else if (cellIndex <= maxIndex) {
 
-                      // now we work with the actual data
-                      // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
-                      let expectedValue = headerIndexMap[cellIndex] !== undefined ? data[rowIndex][headerIndexMap[cellIndex]] : '';
-
-                      // we override the spreadsheet from the code
-                      if (cell.value !== expectedValue) {
-                        // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
-
-                        cell.value = expectedValue;
-                      }
                     }
-
                   }
+
+                  sheet.saveUpdatedCells().then(function () {
+                    callback(null);
+                  }).catch(function (err) {
+                    callback(err);
+                  });
                 }
-
-                sheet.saveUpdatedCells().then(function () {
-                  callback(null);
-                }).catch(function (err) {
-
-                  console.log(err);
-
-                  callback(err);
-                });
-              }
-          ).catch(function (err) {
-            callback(err);
-          });
+            ).catch(function (err) {
+              callback(err);
+            });
+          }
         }
       })
     }
