@@ -6,6 +6,6 @@ const formats = {
 
 module.exports.TRANSLATION_FORMATS = formats;
 
-module.exports.translationFormats = [formats.LOCALE_JSON, formats.GETTEXT];
+module.exports.translationFormats = Object.values(formats);
 
 module.exports.commentCollumnName = '#';
