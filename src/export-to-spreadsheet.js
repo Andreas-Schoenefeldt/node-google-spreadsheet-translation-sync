@@ -123,40 +123,41 @@ module.exports = function (translationFiles, options, callback) {
         }
       });
 
+      // add the header
       data.unshift(header);
 
       // upload to google
       connector(sheetId, options.gid, credentials,
-      /**
-       *
-       * @param err
-       * @param {GoogleSpreadsheetWorksheet} sheet
-       */
-      function (err, sheet) {
-        if (withoutError(err, callback)) {
+          /**
+           *
+           * @param err
+           * @param {GoogleSpreadsheetWorksheet} sheet
+           */
+          function (err, sheet) {
+            if (withoutError(err, callback)) {
 
-          if (sheet.rowCount < data.length) {
-            // this is an error
-            callback(`The selected sheet ${options.gid} has not enough rows for the data. It needs ${data.length - sheet.rowCount} rows more.`);
-          } else {
+              if (sheet.rowCount < data.length) {
+                // this is an error
+                callback(`The selected sheet ${options.gid} has not enough rows for the data. It needs ${data.length - sheet.rowCount} rows more.`);
+              } else {
 
-            sheet.loadCells({
-              'startRowIndex': 0,
-              'endRowIndex': data.length,
-              'startColumnIndex': 0,
-              'endColumnIndex': sheet.columnCount
-            }).then(
-                function () {
-                  let rowIndex;
-                  let cellIndex;
-                  let headerIndexMap = {};
-                  let maxIndex = 0;
+                sheet.loadCells({
+                  'startRowIndex': 0,
+                  'endRowIndex': data.length,
+                  'startColumnIndex': 0,
+                  'endColumnIndex': sheet.columnCount
+                }).then(
+                    function () {
+                      const DATA_CHUNK_ROW_COUNT = 300;
+                      let headerIndexMap = {};
+                      let cellIndex;
+                      let maxIndex = 0;
 
-                  for (rowIndex = 0; rowIndex < data.length; rowIndex++) {
-                    for (cellIndex = 0; cellIndex < sheet.columnCount; cellIndex++) {
-                      let cell = sheet.getCell(rowIndex, cellIndex);
+                      // build the header
+                      for (cellIndex = 0; cellIndex < sheet.columnCount; cellIndex++) {
+                        let cell = sheet.getCell(0, cellIndex);
 
-                      if (rowIndex === 0) {
+
                         // this is the header row
                         if (cell.value) {
                           headerIndexMap[cellIndex] = keyIndexMap[cell.value];
@@ -170,35 +171,61 @@ module.exports = function (translationFiles, options, callback) {
                             cell.value = headerValue;
                           }
                         }
-                      } else if (cellIndex <= maxIndex) {
-
-                        // now we work with the actual data
-                        // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
-                        let expectedValue = headerIndexMap[cellIndex] !== undefined ? data[rowIndex][headerIndexMap[cellIndex]] : '';
-
-                        // we override the spreadsheet from the code
-                        if (cell.value !== expectedValue) {
-                          // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
-
-                          cell.value = expectedValue;
-                        }
                       }
 
-                    }
-                  }
+                      // now we run recursively over our data in 300er chunks
+                      const updateCells = function (rowIndexStart) {
 
-                  sheet.saveUpdatedCells().then(function () {
-                    callback(null);
-                  }).catch(function (err) {
-                    callback(err);
-                  });
-                }
-            ).catch(function (err) {
-              callback(err);
-            });
+                        const rowIndexRunMax = rowIndexStart + DATA_CHUNK_ROW_COUNT;
+
+                        for (let rowIndex = rowIndexStart; rowIndex < data.length && rowIndex <= rowIndexRunMax; rowIndex++) {
+                          for (cellIndex = 0; cellIndex < sheet.columnCount; cellIndex++) {
+                            if (cellIndex <= maxIndex) {
+
+                              let cell = sheet.getCell(rowIndex, cellIndex);
+
+                              // now we work with the actual data
+                              // console.log('Cell R' + cell.row + 'C' + cell.col + ' = ' + cell.value)
+                              let expectedValue = headerIndexMap[cellIndex] !== undefined ? data[rowIndex][headerIndexMap[cellIndex]] : '';
+
+                              // we override the spreadsheet from the code
+                              if (cell.value !== expectedValue) {
+                                // console.log('Update Cell R' + cell.row + 'C' + cell.col + ' from ' + cell.value + ' to ' + expectedValue);
+
+                                cell.value = expectedValue;
+                              }
+                            }
+
+                          }
+                        }
+
+                        console.log(`Uploading rows ${rowIndexStart} - ${Math.min(rowIndexRunMax, data.length)}`);
+
+                        sheet.saveUpdatedCells().then(function () {
+
+                          if (data.length >= rowIndexRunMax) {
+                            // update the next chunk
+                            updateCells(rowIndexRunMax + 1);
+                          } else {
+                            // we are done :)
+                            callback(null);
+                          }
+                        }).catch(function (err) {
+                          // well, apparently something went wrong
+                          callback(err);
+                        });
+                      };
+
+                      // update the data
+                      updateCells(1);
+                    }
+                ).catch(function (err) {
+                  callback(err);
+                });
+              }
+            }
           }
-        }
-      })
+      );
     }
   });
 };
