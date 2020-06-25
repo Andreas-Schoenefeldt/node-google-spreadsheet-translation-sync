@@ -74,14 +74,18 @@ module.exports = function(grunt) {
 
     shell: {
       publish_npm: {
-        command: 'npm publish'
+        command: [
+            'npmrc public', // well, this is at the moment hardcoded to my personal public registry name
+            'npm publish'
+        ].join('&&')
       },
       merge: {
         command: [
           'git checkout develop',
           'git pull origin develop',
           'git merge master',
-          'git push'
+          'git push',
+          'git checkout master' // back to master
         ].join('&&')
       }
     }

@@ -1,6 +1,6 @@
 {
   "name": "google-spreadsheet-translation-sync",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "A plugin to read and write i18n translationsfrom and to google spreadsheets ",
   "main": "index.js",
   "scripts": {
@@ -45,8 +45,8 @@
     "async": "^2.6.3",
     "fast-csv": "^2.5.0",
     "gettext-parser": "^4.0.2",
-    "google-spreadsheet": "^3.0.10",
-    "mkdirp": "^0.5.1",
+    "google-spreadsheet": "^3.0.11",
+    "mkdirp": "^0.5.5",
     "properties-reader": "github:Andreas-Schoenefeldt/properties#master",
     "shelljs": "^0.7.8",
     "tmp": "^0.1.0"
