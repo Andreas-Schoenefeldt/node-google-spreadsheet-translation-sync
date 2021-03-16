@@ -37,7 +37,8 @@ module.exports = function (translationRootFolder, options, callback) {
 
                             if (rowIndex === 0 || cellIndex < headers.length) {
                                 let cell = sheet.getCell(rowIndex, cellIndex);
-                                let val = cell.value ? cell.value.trim() : '';
+                                // under some conditions the value might be GoogleSpreadsheetFormulaError
+                                let val = cell.value && typeof (cell.value) === 'string' ? cell.value.trim() : '';
 
                                 if (rowIndex === 0) {
                                     if (val) {
