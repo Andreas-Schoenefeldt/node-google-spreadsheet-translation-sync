@@ -15,10 +15,15 @@ A plugin to read and write i18n translations from and to google spreadsheets
 ## Usage
 
 ```js
-const translator = require('google-spreadsheet-translation-sync');
+const gsTransSync = require('google-spreadsheet-translation-sync');
 
-// to export to a spreadsheet
-translator.exportToSpreadsheet(['de.json', 'en.json'], options, callback);
+// export to a spreadsheet
+gsTransSync.exportToSpreadsheet(['de.json', 'en.json'], options, callback);
+
+// or import from a spreadsheet
+gsTransSync.importFromSpreadsheet('your/folder', { spreadsheetId: 'xxxxxxx'}, function () {
+    // done :)
+});
 
 ```
     

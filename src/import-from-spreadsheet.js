@@ -5,7 +5,7 @@ module.exports = function (translationRootFolder, options, callback) {
     const connector = require('./connector');
     const withoutError = require('./helpers').withoutError;
     const sheetId = options.spreadsheetId;
-    const credentials = options.credentials;
+    const credentials = options.credentials || require('../test/data/google-test-access.json');
     const translationFormat = options.translationFormat;
 
     connector(sheetId, options.gid, credentials, function (err, sheet) {
