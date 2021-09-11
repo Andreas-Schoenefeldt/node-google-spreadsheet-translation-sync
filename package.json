@@ -43,9 +43,10 @@
   },
   "dependencies": {
     "async": "^2.6.3",
-    "fast-csv": "^2.5.0",
+    "fast-csv": "^4.3",
     "gettext-parser": "^4.0.2",
     "google-spreadsheet": "^3.0.11",
+    "js-yaml": "^4.1.0",
     "mkdirp": "^0.5.5",
     "properties-reader": "github:Andreas-Schoenefeldt/properties#master",
     "shelljs": "^0.7.8",

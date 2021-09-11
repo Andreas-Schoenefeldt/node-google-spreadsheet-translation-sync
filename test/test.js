@@ -13,6 +13,7 @@ const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI';
 const testWorksheetId = '1209225803';
 const testSheetId_gettext = '1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc';
 const testSheetId_properties = '1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE';
+const testSheetId_yaml = '1Ml3jLK6RgbPQ4e7XZpILvB-XWMeziHpwdxS8r4AYNtE';
 const timeout = 20000;
 
 // preparations
@@ -21,11 +22,10 @@ var tmpFile = tmp.fileSync({postfix: '.csv'});
 
 const csv = require('fast-csv');
 const testFile = tmpFile.name;
-const targetPath = path.basename(testFile);
 const csvData = [
   ['key', 'default', 'de', 'it', 'fr', 'pl', 'hu'],
   ['additional.news.' + Math.round(Math.random() * 10000), 'Additional News', null, null, null, 'czecz ' + Math.round(Math.random() * 10000), 'Elfogadom'],
-  ['some.key', 'a Key ' + Math.round(Math.random() * 10000), 'ein Schlüssel ' + Math.round(Math.random() * 10000)]
+  ['some.key', 'a Key ' + Math.round(Math.random() * 10000), 'ein Schlüssel ' + Math.round(Math.random() * 10000)],
 ];
 
 // this provokes the "Cannot read property 'toLocaleLowerCase' of undefined" ERROR
@@ -36,6 +36,7 @@ frOnlyLine2[4] = 'bon!';
 
 csvData.push(frOnlyLine);
 csvData.push(frOnlyLine2);
+csvData.push(['some.other', 'with : colon', 'mit : Doppelpunkt']);
 
 
 csv.writeToPath(
@@ -44,19 +45,22 @@ csv.writeToPath(
 
 function ensureFolder (folder) {
   if (!fs.existsSync(folder)){
-    fs.mkdirSync(folder);
+    fs.mkdirSync(folder, {
+      recursive: true
+    });
   }
   return folder;
 }
 
 
-// const testFor = 'all' // 'connect', 'upload', 'import'
+// const testFor = 'all' // 'connect', 'upload', 'import', 'properties', 'locale_json', 'gettext', 'yml'
+// const testFor = 'yml';
 const testFor = 'all';
 
 const tests = [
   {
      name: 'should connect to the test google doc',
-     run: 'connect',
+     run: ['connect'],
      fnc: function (done) {
       this.timeout(timeout);
 
@@ -76,7 +80,7 @@ const tests = [
 
   {
     name: 'should not connect with wrong credentials',
-    run: 'connect',
+    run: ['connect'],
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -89,7 +93,7 @@ const tests = [
 
   {
     name: 'should connect to a specific sheet',
-    run: 'connect',
+    run: ['connect'],
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -115,7 +119,7 @@ const tests = [
 
   {
     name: 'should upload changes in the namespace properties test project',
-    run: 'upload',
+    run: ['upload', 'properties'],
     fnc: function (done) {
 
       const PropertiesReader = require('properties-reader');
@@ -226,7 +230,7 @@ const tests = [
 
   {
     name: 'should upload changes in the json test project',
-    run: 'upload',
+    run: ['upload', 'locale_json'],
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -294,7 +298,7 @@ const tests = [
 
   {
     name: 'should import updated properties keys in the test project',
-    run: 'import',
+    run: ['import', 'properties'],
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -332,7 +336,7 @@ const tests = [
 
   {
     name: 'should import updated locale_json keys in the test project',
-    run: 'import',
+    run: ['import', 'locale_json'],
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -362,7 +366,7 @@ const tests = [
 
   {
     name: 'should import updated gettext keys in the test project',
-    run: 'import',
+    run: ['import', 'gettext'],
     fnc: function (done) {
       this.timeout(timeout);
 
@@ -395,17 +399,131 @@ const tests = [
         done();
       });
     }
-  }
+  },
+
+  {
+    name: 'should upload changes in the yaml test project',
+    run: ['upload', 'yml'],
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const baseName = 'messages';
+
+      const fs = require('fs');
+      const options = {
+        translationFormat: 'yml',
+        fileBaseName: baseName,
+        keyId: csvData[0][0],
+        gid: 0,
+        namespaceSeparator: '.',
+        spreadsheetId: testSheetId,
+        credentials: accessData
+      }
+
+      const files = [];
+
+      const tempFolder = tmp.dirSync({prefix: 'trans-dyn-to-update'});
+      const yamlHandler = require('../src/handlers/yaml');
+      const fileUtils = require('../src/util/file-utils');
+
+      const data = {};
+
+      csvData[0].forEach( function (key, index) {
+
+        if (index > 0) {
+          data[key] = {default: {}}
+          csvData.forEach(function (lines, i) {
+            if (i > 0 && lines[index]) {
+              data[key].default[lines[0]] = lines[index];
+            }
+          });
+          files.push(tempFolder.name + '/' + fileUtils.buildTranslationFileName(options.translationFormat, null, key, options));
+        }
+      });
+
+      yamlHandler.updateTranslations(data, tempFolder.name, options, () => {
+
+        app.exportToSpreadsheet(files, options, function (err) {
+          const rimraf = require("rimraf");
+          expect(err).to.be.null;
+
+          if (!err) {
+            connector(options.spreadsheetId, options.gid, accessData, function (err, sheet) {
+              expect(err).to.be.null;
+              expect(sheet).to.be.an('object');
+
+              sheet.getRows({
+                offset: 0,
+                limit: csvData.length - 1
+              }).then(function (rows) {
+                expect(rows).to.have.lengthOf(csvData.length - 1);
+                expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
+                expect(rows[0].pl).to.equal(csvData[1][5]);
+                expect(rows[0].default).to.equal(csvData[1][1]);
+                expect(rows[0].hu).to.equal('Elfogadom'); // this was not part of the upload and should not be overwrittem
+                expect(rows[1].default).to.equal(csvData[2][1]);
+                expect(rows[1].de).to.equal(csvData[2][2]);
+                expect(rows[1].key).to.equal(csvData[2][0]);
+                rimraf.sync(tempFolder.name);
+                done()
+              })
+            })
+          } else {
+            rimraf.sync(tempFolder.name);
+            done()
+          }
+        })
+      });
+    }
+  },
+
+  {
+    name: 'should import updated yml keys in the test project',
+    run: ['import', 'yml'],
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const baseName = 'messages';
+
+      const options = {
+        translationFormat: 'yml',
+        fileBaseName: baseName,
+        namespaceSeparator: '.',
+        spreadsheetId: testSheetId_yaml,
+        credentials: accessData
+      };
+
+      const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
+      const testFile = path.resolve(translationRoot + '/' + baseName + '.en.yml');
+
+      app.importFromSpreadsheet(translationRoot, options, function (err) {
+        expect(err).to.be.null
+
+        if (!err) {
+          const yaml = require('js-yaml');
+          const fs = require('fs');
+
+          expect(fs.existsSync(testFile)).to.equal(true);
+
+          const translations = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+          expect(translations.add_address).to.equal("Add new address");
+          expect(translations.additional.news).to.equal("Additional News");
+        }
+        done();
+      });
+    }
+  },
 ];
 
 
 // run the test
-describe('#Export', function () {
+describe('Running ' + testFor + ' tests', function () {
 
   for (let i = 0; i < tests.length; i++) {
     const theTest = tests[i];
 
-    if (testFor === 'all' || theTest.run === testFor) {
+    if (testFor === 'all' || theTest.run.indexOf(testFor) > -1) {
       it(theTest.name, theTest.fnc);
     }
   }

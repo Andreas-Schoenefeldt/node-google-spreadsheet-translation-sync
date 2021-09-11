@@ -26,6 +26,11 @@ module.exports.loadTranslationFile = function (filePath, callback) {
   });
 }
 
+/**
+ * A wrapper to return a flat key: value object structure, used for uploading
+ * @param filePath
+ * @param callback
+ */
 module.exports.getTranslationKeys = function (filePath, callback) {
 
   const translations = {};

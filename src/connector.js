@@ -28,7 +28,7 @@ module.exports = function (sheetId, worksheetId, credentials, callback) {
                         throw new Error('The sheet with the gid ' + sheetId + ' does not exist.');
                     }
 
-                    console.log('Loaded doc: ' + doc.title + ' with ' + sheet.rowCount + ' rows');
+                    // console.log('Loaded doc: ' + doc.title + ' with ' + sheet.rowCount + ' rows');
 
                     callback(null, sheet);
                 },

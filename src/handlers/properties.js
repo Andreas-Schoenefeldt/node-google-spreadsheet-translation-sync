@@ -10,7 +10,7 @@ module.exports.loadTranslationFile = function (filePath, callback) {
 }
 
 /**
- * A wrapper to return a key: value object structure
+ * A wrapper to return a flat key: value object structure, used for uploading
  * @param {string} filePath
  * @param {function} callback
  */

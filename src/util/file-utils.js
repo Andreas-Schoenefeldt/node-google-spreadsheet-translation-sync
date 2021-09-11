@@ -10,8 +10,8 @@ const constraints = require('./constraints');
  * @returns {string}
  */
 module.exports.buildTranslationFileName = function (format, namespace, locale, options) {
-  const namespaceSeparator = options.namespaceSeparator ? options.namespaceSeparator : '-';
-  const base = options.namespaces ? namespace : (options.fileBaseName ? options.fileBaseName : '');
+  const namespaceSeparator = options.namespaceSeparator || '-';
+  const base = options.namespaces ? namespace : (options.fileBaseName || '');
   let extension;
 
   switch (format) {
@@ -23,6 +23,9 @@ module.exports.buildTranslationFileName = function (format, namespace, locale, o
       break;
     case constraints.TRANSLATION_FORMATS.GETTEXT:
       extension = 'po';
+      break;
+    case constraints.TRANSLATION_FORMATS.YAML:
+      extension = 'yml';
       break;
     case constraints.TRANSLATION_FORMATS.PROPERTIES:
 

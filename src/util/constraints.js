@@ -1,7 +1,8 @@
 const formats = {
   LOCALE_JSON: 'locale_json',
   GETTEXT: 'gettext',
-  PROPERTIES: 'properties'
+  PROPERTIES: 'properties',
+  YAML: 'yml'
 };
 
 module.exports.TRANSLATION_FORMATS = formats;

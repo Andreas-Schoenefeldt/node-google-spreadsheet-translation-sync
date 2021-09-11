@@ -62,7 +62,7 @@ module.exports = function (translationFiles, options, callback) {
         localeKey = matches[3];
       }
     } else {
-      localeKey = fileName.substr(options.fileBaseName.length);
+      localeKey = fileName.substr(options.fileBaseName.length + (options.namespaceSeparator ? options.namespaceSeparator.length : 0));
     }
 
     if (dataHeaderIndexMap[namespace] === undefined) {
@@ -199,7 +199,7 @@ module.exports = function (translationFiles, options, callback) {
                           }
                         }
 
-                        console.log(`Uploading rows ${rowIndexStart} - ${Math.min(rowIndexRunMax, data.length)}`);
+                        // console.log(`Uploading rows ${rowIndexStart} - ${Math.min(rowIndexRunMax, data.length)}`);
 
                         sheet.saveUpdatedCells().then(function () {
 
