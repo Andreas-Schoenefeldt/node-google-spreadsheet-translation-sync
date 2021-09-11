@@ -75,7 +75,7 @@ module.exports = function(grunt) {
     shell: {
       publish_npm: {
         command: [
-            'npmrc public', // well, this is at the moment hardcoded to my personal public registry name
+            // 'npmrc public', // well, this is at the moment hardcoded to my personal public registry name
             'npm publish'
         ].join('&&')
       },
