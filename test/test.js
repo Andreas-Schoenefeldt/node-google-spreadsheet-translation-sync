@@ -21,6 +21,10 @@ const timeout = 20000;
 var tmpFile = tmp.fileSync({postfix: '.csv'});
 
 const csv = require('fast-csv');
+const fileUtils = require("../src/util/file-utils");
+const yamlHandler = require("../src/handlers/yaml");
+const rimraf = require("rimraf");
+const yaml = require("js-yaml");
 const testFile = tmpFile.name;
 const csvData = [
   ['key', 'default', 'de', 'it', 'fr', 'pl', 'hu'],
@@ -53,8 +57,8 @@ function ensureFolder (folder) {
 }
 
 
-// const testFor = 'all' // 'connect', 'upload', 'import', 'properties', 'locale_json', 'gettext', 'yml'
-// const testFor = 'yml';
+// const testFor = 'all' // 'connect', 'upload', 'import', 'properties', 'locale_json', 'gettext', 'yml', 'json_structure'
+// const testFor = 'json_structure';
 const testFor = 'all';
 
 const tests = [
@@ -506,6 +510,118 @@ const tests = [
           expect(fs.existsSync(testFile)).to.equal(true);
 
           const translations = yaml.load(fs.readFileSync(testFile, 'utf8'));
+
+          expect(translations.add_address).to.equal("Add new address");
+          expect(translations.additional.news).to.equal("Additional News");
+        }
+        done();
+      });
+    }
+  },
+
+  {
+    name: 'should upload changes in the json_structure test project',
+    run: ['upload', 'json_structure'],
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const baseName = 'messages';
+
+      const options = {
+        translationFormat: 'json_structure',
+        fileBaseName: baseName,
+        keyId: csvData[0][0],
+        gid: 0,
+        namespaceSeparator: '.',
+        spreadsheetId: testSheetId,
+        credentials: accessData
+      }
+
+      const files = [];
+
+      const tempFolder = tmp.dirSync({prefix: 'trans-dyn-to-update'});
+      const handler = require('../src/handlers/json_structure');
+      const fileUtils = require('../src/util/file-utils');
+
+      const data = {};
+
+      csvData[0].forEach( function (key, index) {
+
+        if (index > 0) {
+          data[key] = {default: {}}
+          csvData.forEach(function (lines, i) {
+            if (i > 0 && lines[index]) {
+              data[key].default[lines[0]] = lines[index];
+            }
+          });
+          files.push(tempFolder.name + '/' + fileUtils.buildTranslationFileName(options.translationFormat, null, key, options));
+        }
+      });
+
+      handler.updateTranslations(data, tempFolder.name, options, () => {
+
+        app.exportToSpreadsheet(files, options, function (err) {
+          const rimraf = require("rimraf");
+          expect(err).to.be.null;
+
+          if (!err) {
+            connector(options.spreadsheetId, options.gid, accessData, function (err, sheet) {
+              expect(err).to.be.null;
+              expect(sheet).to.be.an('object');
+
+              sheet.getRows({
+                offset: 0,
+                limit: csvData.length - 1
+              }).then(function (rows) {
+                expect(rows).to.have.lengthOf(csvData.length - 1);
+                expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
+                expect(rows[0].pl).to.equal(csvData[1][5]);
+                expect(rows[0].default).to.equal(csvData[1][1]);
+                expect(rows[0].hu).to.equal('Elfogadom'); // this was not part of the upload and should not be overwrittem
+                expect(rows[1].default).to.equal(csvData[2][1]);
+                expect(rows[1].de).to.equal(csvData[2][2]);
+                expect(rows[1].key).to.equal(csvData[2][0]);
+                rimraf.sync(tempFolder.name);
+                done()
+              })
+            })
+          } else {
+            rimraf.sync(tempFolder.name);
+            done()
+          }
+        })
+      });
+    }
+  },
+
+  {
+    name: 'should import updated json_structure keys from the test project',
+    run: ['import', 'json_structure'],
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const baseName = 'messages';
+
+      const options = {
+        translationFormat: 'json_structure',
+        fileBaseName: baseName,
+        namespaceSeparator: '.',
+        spreadsheetId: testSheetId_yaml,
+        credentials: accessData
+      };
+
+      const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
+      const testFile = path.resolve(translationRoot + '/' + baseName + '.en.json');
+
+      app.importFromSpreadsheet(translationRoot, options, function (err) {
+        expect(err).to.be.null
+
+        if (!err) {
+          const fs = require('fs');
+
+          expect(fs.existsSync(testFile)).to.equal(true);
+
+          const translations = require(testFile);
 
           expect(translations.add_address).to.equal("Add new address");
           expect(translations.additional.news).to.equal("Additional News");

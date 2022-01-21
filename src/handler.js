@@ -1,6 +1,5 @@
 'use strict'
 
-
 /**
  *
  * @param translationFormat
@@ -13,6 +12,8 @@ module.exports.getHandler = function (translationFormat) {
   switch (translationFormat) {
     default:
       throw new Error('No handler available for the translation format ' + translationFormat);
+    case TRANSLATION_FORMATS.JSON_STRUCTURE:
+      return require('./handlers/json_structure');
     case TRANSLATION_FORMATS.LOCALE_JSON:
       return require('./handlers/locale_json');
     case TRANSLATION_FORMATS.GETTEXT:

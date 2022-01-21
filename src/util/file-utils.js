@@ -19,6 +19,7 @@ module.exports.buildTranslationFileName = function (format, namespace, locale, o
       throw new Error('Unknown extension for translation format ' + format);
       break;
     case constraints.TRANSLATION_FORMATS.LOCALE_JSON:
+    case constraints.TRANSLATION_FORMATS.JSON_STRUCTURE:
       extension = 'json';
       break;
     case constraints.TRANSLATION_FORMATS.GETTEXT:

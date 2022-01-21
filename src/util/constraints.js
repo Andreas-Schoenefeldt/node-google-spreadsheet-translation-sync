@@ -1,5 +1,6 @@
 const formats = {
-  LOCALE_JSON: 'locale_json',
+  LOCALE_JSON: 'locale_json', // just a plain array - lorem.ipsum keys will be {'lorem.ipsum': 'whatever'}
+  JSON_STRUCTURE: 'json_structure', // lorem.ipsum keys will be converted into a json structure: {lorem: {ipsum: 'whatever'}}
   GETTEXT: 'gettext',
   PROPERTIES: 'properties',
   YAML: 'yml'
