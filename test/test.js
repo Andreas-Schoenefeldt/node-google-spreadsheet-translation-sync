@@ -158,7 +158,7 @@ const tests = [
               file: propertiesFile,
               namespace: namespace,
               locale: key,
-              reader: PropertiesReader(propertiesFile, {write_sections: false})
+              reader: PropertiesReader(propertiesFile, 'utf-8', { writer: { saveSections: false } })
             }
 
             csvData.forEach(function (lines, i) {

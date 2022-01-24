@@ -46,7 +46,7 @@ module.exports.updateTranslations = function (translationData, translationRootFo
           fs.writeFileSync(file, '');
         }
 
-        const props = PropertiesReader(file, {write_sections: false});
+        const props = PropertiesReader(file, 'utf-8', { writer: { saveSections: false } });
         const potentiallyUpdatedTranslations = translationData[locale][namespace];
 
         Object.keys(potentiallyUpdatedTranslations).forEach(function (key) {

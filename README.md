@@ -86,6 +86,7 @@ If `namespaces` or `fileBaseName` is used, this is the separating character. For
 Type: `Enum`   
 Possible Values: 
 * `locale_json` (translations are stored in simple key/value json files)
+* `json_structure` (translations are stored in a json tree, where the keys are split by the . character)
 * `gettext` (utilizes [node gettext-parser](https://github.com/smhg/gettext-parser) for the work with po and mo files)
 * `properties` (utilizes [propertie-reader](https://github.com/steveukx/properties) for java property files)
 * `yml` (utilizes [js-yaml](https://github.com/nodeca/js-yaml) for symfony yaml translation files)
