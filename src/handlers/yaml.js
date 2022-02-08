@@ -2,6 +2,7 @@ const fs = require("fs");
 const yaml = require('js-yaml');
 const constraints = require("../util/constraints");
 const {withoutError} = require("../helpers");
+const {resolveStructureToTree} = require("../util/structure-utils");
 
 module.exports.loadTranslationFile = function (filePath, callback) {
     if (fs.existsSync(filePath)) {
@@ -65,24 +66,7 @@ module.exports.updateTranslations = function (translationData, translationRootFo
                 mod.loadTranslationFile(file, function (translations) {
                     const potentiallyUpdatedTranslations = translationData[locale][namespace];
 
-                    Object.keys(potentiallyUpdatedTranslations).forEach((key) => {
-                        const parts = key.split('.');
-                        let tree = translations;
-
-                        while (parts.length > 0) {
-                            const part = parts.shift();
-
-                            if (parts.length === 0) {
-                                tree[part] = potentiallyUpdatedTranslations[key];
-                            } else {
-                                if (!tree[part]) {
-                                    tree[part] = {}
-                                }
-
-                                tree = tree[part];
-                            }
-                        }
-                    });
+                    resolveStructureToTree(translations, potentiallyUpdatedTranslations);
 
                     // now we write
                     fs.writeFile(file, yaml.dump(translations, {indent: 4}), function (err) {
