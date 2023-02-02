@@ -160,7 +160,9 @@ module.exports = function (translationFiles, options, callback) {
 
                         // this is the header row
                         if (cell.value) {
-                          headerIndexMap[cellIndex] = keyIndexMap[cell.value];
+                          // clear comments from the header name
+                          let cleanLocale = cell.value.split('#')[0].trim();
+                          headerIndexMap[cellIndex] = keyIndexMap[cleanLocale];
                           maxIndex = cellIndex
                         } else {
                           // this looks like an initial upload, let's do it

@@ -20,8 +20,15 @@ gsTransSync.exportToSpreadsheet(['de.json', 'en.json'], options, callback);
 gsTransSync.importFromSpreadsheet('your/folder', { spreadsheetId: 'xxxxxxx'}, function () {
     // done :)
 });
-
 ```
+
+On the Google spreadsheets side, this needs to have the following structure:
+
+|key|default|de|en|... any other locale|<locale> # <comment>|
+|---|---|---|---|---|---|
+|test.something|Test Schlüssel|Test Key|****||
+
+Please not the line `<locale> # <comment>` - `# <comment>` will be ignored in uploads and downloads, so you can put some information for your translators into the google doc (They will do it anyway, so this way you don't need to remove the comment before import).
     
 ### Options   
 

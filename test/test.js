@@ -9,10 +9,10 @@ const accessData = require('./data/google-test-access.json');
 const tmp = require('tmp');
 const async = require('async');
 
-const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI';
+const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI'; // https://docs.google.com/spreadsheets/d/1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI/edit#gid=0
 const testWorksheetId = '1209225803';
 const testSheetId_gettext = '1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc';
-const testSheetId_properties = '1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE';
+const testSheetId_properties = '1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE'; // https://docs.google.com/spreadsheets/d/1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE/edit#gid=0
 const testSheetId_yaml = '1Ml3jLK6RgbPQ4e7XZpILvB-XWMeziHpwdxS8r4AYNtE';
 const timeout = 20000;
 
@@ -202,7 +202,7 @@ const tests = [
                 }).then(function (rows) {
                   expect(rows).to.have.lengthOf((csvData.length - 1) * 2);
                   expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
-                  expect(rows[0].pl).to.equal(csvData[1][5]);
+                  expect(rows[0]['pl # with comment']).to.equal(csvData[1][5]);
                   expect(rows[0].default).to.equal(csvData[1][1]);
                   expect(rows[0].hu).to.equal('Elfogadom');
                   expect(rows[0].namespace).to.equal(namespaces[0]);
@@ -281,7 +281,7 @@ const tests = [
             }).then(function (rows) {
               expect(rows).to.have.lengthOf(csvData.length - 1);
               expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
-              expect(rows[0].pl).to.equal(csvData[1][5]);
+              expect(rows[0]['pl # with comment']).to.equal(csvData[1][5]);
               expect(rows[0].default).to.equal(csvData[1][1]);
               expect(rows[0].hu).to.equal('Elfogadom'); // this was not part of the upload and should not be overwrittem
               expect(rows[1].default).to.equal(csvData[2][1]);
@@ -462,7 +462,7 @@ const tests = [
               }).then(function (rows) {
                 expect(rows).to.have.lengthOf(csvData.length - 1);
                 expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
-                expect(rows[0].pl).to.equal(csvData[1][5]);
+                expect(rows[0]['pl # with comment']).to.equal(csvData[1][5]);
                 expect(rows[0].default).to.equal(csvData[1][1]);
                 expect(rows[0].hu).to.equal('Elfogadom'); // this was not part of the upload and should not be overwrittem
                 expect(rows[1].default).to.equal(csvData[2][1]);
@@ -575,7 +575,7 @@ const tests = [
               }).then(function (rows) {
                 expect(rows).to.have.lengthOf(csvData.length - 1);
                 expect(rows[0][options.keyId]).to.equal(csvData[1][0]);
-                expect(rows[0].pl).to.equal(csvData[1][5]);
+                expect(rows[0]['pl # with comment']).to.equal(csvData[1][5]);
                 expect(rows[0].default).to.equal(csvData[1][1]);
                 expect(rows[0].hu).to.equal('Elfogadom'); // this was not part of the upload and should not be overwrittem
                 expect(rows[1].default).to.equal(csvData[2][1]);

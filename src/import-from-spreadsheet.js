@@ -42,6 +42,9 @@ module.exports = function (translationRootFolder, options, callback) {
 
                                 if (rowIndex === 0) {
                                     if (val) {
+                                        // clear comments from the header
+                                        val = val.split('#')[0].trim();
+
                                         headers[cellIndex] = val;
                                         if (cellIndex > keyCellIndex) {
                                             translationData[val] = {};
