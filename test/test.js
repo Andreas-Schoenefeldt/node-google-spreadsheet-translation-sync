@@ -11,9 +11,9 @@ const async = require('async');
 
 const testSheetId = '1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI'; // https://docs.google.com/spreadsheets/d/1ZJK1G_3wrEo9lnu1FenjOzSy3uoAi-RLWbph1cI6DWI/edit#gid=0
 const testWorksheetId = '1209225803';
-const testSheetId_gettext = '1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc';
+const testSheetId_gettext = '1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc'; // https://docs.google.com/spreadsheets/d/1CRvX4TCxUGCcs_MtKC5BdEViHYzYzLXdqtbuVaAXfKc/edit#gid=0
 const testSheetId_properties = '1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE'; // https://docs.google.com/spreadsheets/d/1Z0Mpbf6lgdGiuiHlpb9DENVfKxkxSRwcfQEDYrgokEE/edit#gid=0
-const testSheetId_yaml = '1Ml3jLK6RgbPQ4e7XZpILvB-XWMeziHpwdxS8r4AYNtE';
+const testSheetId_yaml = '1Ml3jLK6RgbPQ4e7XZpILvB-XWMeziHpwdxS8r4AYNtE'; // https://docs.google.com/spreadsheets/d/1Ml3jLK6RgbPQ4e7XZpILvB-XWMeziHpwdxS8r4AYNtE/edit#gid=0
 const timeout = 20000;
 
 // preparations
@@ -21,10 +21,6 @@ const timeout = 20000;
 var tmpFile = tmp.fileSync({postfix: '.csv'});
 
 const csv = require('fast-csv');
-const fileUtils = require("../src/util/file-utils");
-const yamlHandler = require("../src/handlers/yaml");
-const rimraf = require("rimraf");
-const yaml = require("js-yaml");
 const testFile = tmpFile.name;
 const csvData = [
   ['key', 'default', 'de', 'it', 'fr', 'pl', 'hu'],
@@ -323,12 +319,15 @@ const tests = [
 
         if (!err) {
           const testFile = path.resolve(translationRoot + '/other.properties');
+          const testFilePl = path.resolve(translationRoot + '/other_pl.properties');
           const PropertiesReader = require('properties-reader');
 
           const props = PropertiesReader(testFile);
+          const propsPl = PropertiesReader(testFilePl);
 
           // expect(Object.keys(props.getAllProperties()).length).to.equal(csvData.length - 1); // without the header
           expect(props.get(csvData[2][0])).to.equal(csvData[2][1]);
+          expect(propsPl.get(csvData[1][0])).to.equal(csvData[1][5]);
         }
 
         done();
@@ -352,15 +351,18 @@ const tests = [
 
       const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
       const testFile = path.resolve(translationRoot + '/default.json');
+      const testFilePl = path.resolve(translationRoot + '/pl.json');
 
       app.importFromSpreadsheet(translationRoot, options, function (err) {
         expect(err).to.be.null
 
         if (!err) {
           const defaultKeys = require(testFile);
+          const plKeys = require(testFilePl);
 
           // expect(Object.keys(defaultKeys).length).to.equal(326);
           expect(defaultKeys[csvData[2][0]]).to.equal(csvData[2][1]);
+          expect(plKeys[csvData[1][0]]).to.equal(csvData[1][5]);
         }
 
         done();
@@ -385,6 +387,7 @@ const tests = [
 
       const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
       const testFile = path.resolve(translationRoot + '/' + baseName + '-en.po');
+      const testFilePl = path.resolve(translationRoot + '/' + baseName + '-pl.po');
 
       app.importFromSpreadsheet(translationRoot, options, function (err) {
         expect(err).to.be.null
@@ -395,9 +398,11 @@ const tests = [
           expect(fs.existsSync(testFile)).to.equal(true);
 
           const po = require('gettext-parser').po.parse(fs.readFileSync(testFile));
+          const poPl = require('gettext-parser').po.parse(fs.readFileSync(testFilePl));
           const translations = po.translations[''];
-
+          const translationsPl = poPl.translations[''];
           expect(translations.add_address.msgstr[0]).to.equal("Add new address");
+          expect(translationsPl['additional.news'].msgstr[0]).to.equal('czecz 2242');
         }
 
         done();
