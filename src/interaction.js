@@ -124,8 +124,10 @@ module.exports = async function () {
                 const line = [key];
 
                 Object.keys(data).forEach(locale => {
-                    head.push(locale);
-                    line.push(data[locale][key] || '')
+                    if (data[locale][key]) {
+                        head.push(locale);
+                        line.push(data[locale][key] || '')
+                    }
                 })
 // default export as Jira MD for now
                 console.log(`||${head.join('||')}||
