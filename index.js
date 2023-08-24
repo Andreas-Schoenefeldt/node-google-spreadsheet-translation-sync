@@ -17,3 +17,6 @@ module.exports.importFromSpreadsheet = require('./src/import-from-spreadsheet');
 
 
 module.exports.possibleTranslationFormats = require('./src/util/constraints').translationFormats;
+
+
+module.exports.interaction = require('./src/interaction');
