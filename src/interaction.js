@@ -131,8 +131,7 @@ module.exports = async function () {
                 })
 // default export as Jira MD for now
                 console.log(`||${head.join('||')}||
-|${line.join('|')}|
-`)
+|${line.join('|').replace('{', '\\{').replace('}', '\\}')}|`)
 
                 break;
         }
