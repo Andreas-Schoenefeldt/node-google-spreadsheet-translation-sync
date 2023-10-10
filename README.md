@@ -107,6 +107,11 @@ Default value: `null`
 
 This is absolutely required to make it work  
 
+#### options.gid
+Type: `String`   
+Default value: `0`
+
+Allows to connect to a dedicated worksheet of the spreadsheet
 
 ## Tests
 
