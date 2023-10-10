@@ -14,7 +14,7 @@ module.exports = function (translationFiles, options, callback) {
   const async = require('async')
 
   const sheetId = options.spreadsheetId;
-  const credentials = options.credentials;
+  const credentials = options.credentials || require('../test/data/google-test-access.json');
   const translationFormat = options.translationFormat;
 
   // get the handler
