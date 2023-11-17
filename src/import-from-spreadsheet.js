@@ -1,5 +1,10 @@
 'use strict'
-
+/**
+ *
+ * @param translationRootFolder
+ * @param {OptionsObject} options
+ * @param callback
+ */
 module.exports = function (translationRootFolder, options, callback) {
 
     const connector = require('./connector');
@@ -72,6 +77,26 @@ module.exports = function (translationRootFolder, options, callback) {
                                 }
                             }
                         }
+                    }
+
+                    if (options.defaultFallback) {
+
+                        const defaultLocale = options.defaultLocaleName || 'default';
+
+                        Object.keys(translationData).forEach(locale => {
+                            // use the default locale as reference
+                            Object.keys(translationData[defaultLocale]).forEach(namespace => {
+                                if (!translationData[locale][namespace]) {
+                                    translationData[locale][namespace] = {};
+                                }
+
+                                Object.keys(translationData[defaultLocale][namespace]).forEach(key => {
+                                    if (translationData[locale][namespace][key] === undefined) {
+                                        translationData[locale][namespace][key] = translationData[defaultLocale][namespace][key];
+                                    }
+                                });
+                            });
+                        });
                     }
 
                     // now we get the handler

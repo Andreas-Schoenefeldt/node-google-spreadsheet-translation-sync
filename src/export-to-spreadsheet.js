@@ -5,7 +5,7 @@
 
 /**
  * @param {[]} translationFiles - an array of files
- * @param {{translationFormat: string, mode: string, spreadsheetId: string, gid : string, credentials: {}, keyId: string, fileBaseName: string, namespaces: boolean, defaultLocaleName: string}} options
+ * @param {OptionsObject} options
  * @param {function} callback
  */
 module.exports = function (translationFiles, options, callback) {

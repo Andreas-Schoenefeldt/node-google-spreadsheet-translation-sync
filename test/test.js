@@ -54,7 +54,7 @@ function ensureFolder (folder) {
 
 
 // const testFor = 'all' // 'connect', 'upload', 'import', 'properties', 'locale_json', 'gettext', 'yml', 'json_structure'
-// const testFor = 'json_structure';
+// const testFor = 'gettext';
 const testFor = 'all';
 
 const tests = [
@@ -403,6 +403,49 @@ const tests = [
           const translationsPl = poPl.translations[''];
           expect(translations.add_address.msgstr[0]).to.equal("Add new address");
           expect(translationsPl['additional.news'].msgstr[0]).to.equal('czecz 2242');
+          expect(translationsPl.add_address).to.be.undefined;
+        }
+
+        done();
+      });
+    }
+  },
+
+  {
+    name: 'should fill empty columns with the default',
+    run: ['import', 'gettext'],
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const baseName = 'om-mani-peme';
+
+      const options = {
+        translationFormat: 'gettext',
+        fileBaseName: baseName,
+        spreadsheetId: testSheetId_gettext,
+        credentials: accessData,
+        defaultLocaleName: 'en',
+        defaultFallback: true
+      };
+
+      const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
+      const testFile = path.resolve(translationRoot + '/' + baseName + '-en.po');
+      const testFileDe = path.resolve(translationRoot + '/' + baseName + '-de.po');
+
+      app.importFromSpreadsheet(translationRoot, options, function (err) {
+        expect(err).to.be.null
+
+        if (!err) {
+          const fs = require('fs');
+
+          expect(fs.existsSync(testFile)).to.equal(true);
+
+          const po = require('gettext-parser').po.parse(fs.readFileSync(testFile));
+          const poDe = require('gettext-parser').po.parse(fs.readFileSync(testFileDe));
+          const translations = po.translations[''];
+          const translationsDe = poDe.translations[''];
+          expect(translations['additional.news'].msgstr[0]).to.equal("Additional News");
+          expect(translationsDe['additional.news']?.msgstr[0]).to.equal('Additional News');
         }
 
         done();

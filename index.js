@@ -1,6 +1,11 @@
 'use strict'
 
 /**
+ * The options type
+ * @typedef {{translationFormat: string, mode: string, spreadsheetId: string, gid : string, credentials: {}, keyId: string, fileBaseName: string, namespaces: boolean, defaultLocaleName: string, defaultFallback: boolean}} OptionsObject
+ */
+
+/**
  * Adds commas to a number
  */
 
