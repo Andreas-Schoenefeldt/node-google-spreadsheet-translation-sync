@@ -53,7 +53,7 @@ function ensureFolder (folder) {
 }
 
 
-// const testFor = 'all' // 'connect', 'upload', 'import', 'properties', 'locale_json', 'gettext', 'yml', 'json_structure'
+// const testFor = 'all' // 'connect', 'upload', 'import', 'properties', 'locale_json', 'gettext', 'yml', 'json_structure', 'wordpress'
 // const testFor = 'gettext';
 const testFor = 'all';
 
@@ -363,6 +363,74 @@ const tests = [
           // expect(Object.keys(defaultKeys).length).to.equal(326);
           expect(defaultKeys[csvData[2][0]]).to.equal(csvData[2][1]);
           expect(plKeys[csvData[1][0]]).to.equal(csvData[1][5]);
+        }
+
+        done();
+      });
+    }
+  },
+
+  {
+    name: 'should import updated wordpress keys in the test project',
+    run: ['import', 'wordpress'],
+    fnc: function (done) {
+      this.timeout(timeout);
+
+      const baseName = 'karmapa-chenno';
+
+      const options = {
+        translationFormat: 'wordpress',
+        fileBaseName: baseName,
+        spreadsheetId: testSheetId_gettext,
+        credentials: accessData
+      };
+
+      const translationRoot = ensureFolder(path.resolve('./test/translations/' + options.translationFormat + '/'));
+      const testFile = path.resolve(translationRoot + '/' + baseName + '-en.po');
+      const testFilePhp = path.resolve(translationRoot + '/' + baseName + '-en.l10n.php');
+      const testFilePl = path.resolve(translationRoot + '/' + baseName + '-pl.po');
+
+      app.importFromSpreadsheet(translationRoot, options, function (err) {
+        expect(err).to.be.null
+
+        if (!err) {
+          const fs = require('fs');
+
+          expect(fs.existsSync(testFile)).to.equal(true);
+
+          const po = require('gettext-parser').po.parse(fs.readFileSync(testFile));
+          const poPl = require('gettext-parser').po.parse(fs.readFileSync(testFilePl));
+          const translations = po.translations[''];
+          const translationsPl = poPl.translations[''];
+          expect(translations.add_address.msgstr[0]).to.equal("Add new address");
+          expect(translationsPl['additional.news'].msgstr[0]).to.equal('czecz 2242');
+          expect(translationsPl.add_address).to.be.undefined;
+
+          const phpContent = fs.readFileSync(testFilePhp).toString();
+
+          expect(phpContent).to.equal('<?php\n' +
+              'return [\n' +
+              '  "content-type" => "text/plain; charset=utf-8",\n' +
+              '  "plural-forms" => "nplurals=2; plural=(n!=1);",\n' +
+              '  "x-generator" => "node-google-spreadsheet-translation-sync",\n' +
+              '  "project-id-version" => "karmapa-chenno",\n' +
+              '  "language" => "en",\n' +
+              '  "messages" => [\n' +
+              '    "add_address" => "Add new address",\n' +
+              '    "add_as_favourite" => "Add to Quick Contacts",\n' +
+              '    "add_center" => "Add Center",\n' +
+              '    "add_contact" => "Add contact",\n' +
+              '    "add_phone_number" => "Add new phone",\n' +
+              '    "additional.news" => "Additional News",\n' +
+              '    "administration" => "Administration",\n' +
+              '    "administration_info" => "This page allows you to access functions connected to Members, Centers, Roles and Groups.",\n' +
+              '    "all" => "All",\n' +
+              '    "all_centers" => "All Centers",\n' +
+              '    "all_contacts" => "All contacts",\n' +
+              '    "some.key" => "a Key 370",\n' +
+              '  ]\n' +
+              '];\n');
+
         }
 
         done();

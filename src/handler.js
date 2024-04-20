@@ -23,5 +23,7 @@ module.exports.getHandler = function (translationFormat) {
     case 'yaml':
     case TRANSLATION_FORMATS.YAML:
       return require('./handlers/yaml');
+    case TRANSLATION_FORMATS.WORDPRESS:
+      return require('./handlers/wordpress');
   }
 }
