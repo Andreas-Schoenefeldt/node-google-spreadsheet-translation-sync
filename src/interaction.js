@@ -16,7 +16,7 @@ module.exports = async function () {
     const options = {
         keyId: 'key',
         gid: '0',
-        credentials: require('../test/data/google-test-access.json'),
+        credentials: require('../test/data/access'),
         fileBaseName: '',
         namespaces: false,
         translationFormat: 'locale_json',

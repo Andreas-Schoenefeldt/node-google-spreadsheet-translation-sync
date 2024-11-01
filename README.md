@@ -10,6 +10,14 @@ A plugin to read and write i18n translations from and to google spreadsheets
 
 ## Usage
 
+This tool can interact with your project via cli:
+
+```shell
+node ./interact.js
+```
+
+Or set it up for automated import/export:
+
 ```js
 const gsTransSync = require('google-spreadsheet-translation-sync');
 
@@ -29,7 +37,7 @@ On the Google spreadsheets side, this needs to have the following structure:
 |test.something|Test Schlüssel|Test Key|****||
 
 Please not the line `<locale> # <comment>` - `# <comment>` will be ignored in uploads and downloads, so you can put some information for your translators into the google doc (They will do it anyway, so this way you don't need to remove the comment before import).
-    
+
 ### Options   
 
 #### options.credentials

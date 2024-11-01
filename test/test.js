@@ -5,7 +5,7 @@ const fs = require('fs');
 const expect = require('chai').expect;
 const app = require('../index');
 const connector = require('../src/connector');
-const accessData = require('./data/google-test-access.json');
+const accessData = require('./data/access');
 const tmp = require('tmp');
 const async = require('async');
 
