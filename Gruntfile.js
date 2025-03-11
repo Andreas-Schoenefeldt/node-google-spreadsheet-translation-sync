@@ -97,7 +97,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-bump');
   grunt.loadNpmTasks('grunt-shell');
 
-  grunt.registerTask('build', 'Production Build', function() {
+  grunt.registerTask('release', 'Production Build', function() {
     grunt.task.run('prompt', 'bump', 'shell:publish_npm', 'shell:merge');
   });
 
