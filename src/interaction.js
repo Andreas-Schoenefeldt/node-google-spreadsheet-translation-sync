@@ -3,9 +3,6 @@
  * @param {{translationFormat: string, mode: string, spreadsheetId: string, gid : string, credentials: {}, keyId: string, fileBaseName: string, namespaces: boolean, defaultLocaleName: string}} options
  * @param {function} callback
  */
-const fs = require("fs");
-const async = require("async");
-const path = require("path");
 
 module.exports = async function () {
     const async= require('async')
