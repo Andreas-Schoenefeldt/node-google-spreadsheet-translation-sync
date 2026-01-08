@@ -4,6 +4,8 @@
  * @param {function} callback
  */
 
+const prompts = require("@inquirer/prompts");
+
 module.exports = async function () {
     const async= require('async')
     const path = require('path');
@@ -12,6 +14,7 @@ module.exports = async function () {
 
     const options = {
         keyId: 'key',
+        spreadsheetId: '',
         gid: '0',
         credentials: require('../test/data/access'),
         fileBaseName: '',
@@ -95,9 +98,25 @@ module.exports = async function () {
         switch (await prompts.select({
             message: 'What would you like to do?',
             choices: [
-                {value: 'export_key', name: "Export a single key"}
+                {value: 'export_key', name: "Export a single key"},
+                {value: 'import', name: "Import from Spreadsheet"}
             ]
         })) {
+            case 'import':
+                options.spreadsheetId = await prompts.input({
+                    message: 'Which Spreadsheet Id (first sheet for now only)?'
+                });
+
+                const importer = require('./import-from-spreadsheet');
+
+                importer(folder, options, (err) => {
+                    if (err) {
+                        console.error(err);
+                    } else {
+                        console.log('Import done');
+                    }
+                });
+                break;
             case 'export_key':
 
                 const key = await prompts.input({
