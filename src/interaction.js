@@ -104,7 +104,11 @@ module.exports = async function () {
         })) {
             case 'import':
                 options.spreadsheetId = await prompts.input({
-                    message: 'Which Spreadsheet Id (first sheet for now only)?'
+                    message: 'Which Spreadsheet Id?'
+                });
+                options.gid = await prompts.input({
+                    message: 'Which gid?',
+                    default: options.gid
                 });
 
                 const importer = require('./import-from-spreadsheet');
