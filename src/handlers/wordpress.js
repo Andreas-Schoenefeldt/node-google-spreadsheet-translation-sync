@@ -4,6 +4,7 @@ const fs = require('fs');
 const withoutError = require('../helpers').withoutError
 const gettextParser = require("gettext-parser");
 const constraints = require('../util/constraints');
+const stringUtils = require('../util/string-utils');
 
 
 module.exports.loadTranslationFile = function (filePath, callback) {
@@ -133,14 +134,14 @@ module.exports.updateTranslations = function (translationData, translationRootFo
                         phpContent += 'return [\n';
 
                         Object.keys(parsedObj.headers).forEach((header) => {
-                            phpContent += `  "${header.toLocaleLowerCase()}" => ${JSON.stringify(parsedObj.headers[header])},\n`;
+                            phpContent += `  '${stringUtils.escapeSingleQuotes(header.toLocaleLowerCase())}' => '${stringUtils.escapeSingleQuotes(parsedObj.headers[header])}',\n`;
                         })
 
                         phpContent += `  "messages" => [\n`;
 
                         Object.keys(parsedObj.translations['']).forEach((key) => {
                             if (key) {
-                                phpContent += `    "${key}" => ${JSON.stringify(parsedObj.translations[''][key].msgstr[0])},\n`;
+                                phpContent += `    '${stringUtils.escapeSingleQuotes(key)}' => '${stringUtils.escapeSingleQuotes(parsedObj.translations[''][key].msgstr[0])}',\n`;
                             }
                         });
 

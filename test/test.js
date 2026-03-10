@@ -411,29 +411,9 @@ const tests = [
           expect(translationsPl.add_address).to.be.undefined;
 
           const phpContent = fs.readFileSync(testFilePhp).toString();
+          const expectedContent = fs.readFileSync(path.resolve('./test/data/wp-expected-en.txt')).toString();
 
-          expect(phpContent).to.equal('<?php\n' +
-              'return [\n' +
-              '  "content-type" => "text/plain; charset=utf-8",\n' +
-              '  "plural-forms" => "nplurals=2; plural=(n!=1);",\n' +
-              '  "x-generator" => "node-google-spreadsheet-translation-sync",\n' +
-              '  "project-id-version" => "karmapa-chenno",\n' +
-              '  "language" => "en",\n' +
-              '  "messages" => [\n' +
-              '    "add_address" => "Add new address",\n' +
-              '    "add_as_favourite" => "Add to Quick Contacts",\n' +
-              '    "add_center" => "Add Center",\n' +
-              '    "add_contact" => "Add contact",\n' +
-              '    "add_phone_number" => "Add new phone",\n' +
-              '    "additional.news" => "Additional News",\n' +
-              '    "administration" => "Administration",\n' +
-              '    "administration_info" => "This page allows you to access functions connected to Members, Centers, Roles and Groups.",\n' +
-              '    "all" => "All",\n' +
-              '    "all_centers" => "All Centers",\n' +
-              '    "all_contacts" => "All contacts",\n' +
-              '    "some.key" => "a Key 370",\n' +
-              '  ]\n' +
-              '];\n');
+          expect(phpContent).to.equal(expectedContent);
 
         }
 

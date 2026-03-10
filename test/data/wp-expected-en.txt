@@ -1,0 +1,23 @@
+<?php
+return [
+  'content-type' => 'text/plain; charset=utf-8',
+  'plural-forms' => 'nplurals=2; plural=(n!=1);',
+  'x-generator' => 'node-google-spreadsheet-translation-sync',
+  'project-id-version' => 'karmapa-chenno',
+  'language' => 'en',
+  "messages" => [
+    'add_address' => 'Add new address',
+    'add_as_favourite' => 'Add to Quick Contacts',
+    'add_center' => 'Add Center',
+    'add_contact' => 'Add contact',
+    'add_phone_number' => 'Add new phone',
+    'additional.news' => 'Additional News',
+    'administration' => 'Administration',
+    'administration_info' => 'This page allows you to access functions connected to Members, Centers, Roles and Groups.',
+    'all' => 'All',
+    'all_centers' => 'All Centers',
+    'all_contacts' => 'All contacts',
+    'key_with_special_chars' => 'Test \'quote\' or "quote"',
+    'some.key' => 'a Key 370',
+  ]
+];
